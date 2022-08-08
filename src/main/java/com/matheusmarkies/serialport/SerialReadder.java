@@ -5,8 +5,9 @@ import com.fazecast.jSerialComm.SerialPortEvent;
 import com.fazecast.jSerialComm.SerialPortPacketListener;
 
 import java.io.*;
+import java.util.List;
 
-public class SerialReadder implements SerialPortPacketListener {
+public class SerialReadder{
 
     private SerialPort serialPort;
     private String serialPortName;
@@ -22,52 +23,33 @@ public class SerialReadder implements SerialPortPacketListener {
     }
 
     public boolean connect(){
-        serialPort = SerialPort.getCommPort(this.serialPortName);
+        SerialPort[] serialPorts = SerialManager.getSerialPortList();
+
+        for (SerialPort port: serialPorts)
+            if(port.getDescriptivePortName().equals(serialPortName)) {
+                serialPort = port;
+                break;
+            }
 
         if (serialPort.isOpen())
             return false;
         else {
-                serialPort.openPort();
-            serialPort.addDataListener(this);
-                return true;
+            serialPort.openPort();
+
+            serialPort.setBaudRate(SerialReadder.PORT_RATE);
+            serialPort.addDataListener(new SerialRunnable(serialPort));
+
+            return serialPort.isOpen();
         }
     }
 
     public synchronized void close(){
-        if(serialPort.isOpen()){
+        if(serialPort.isOpen())
             serialPort.closePort();
-        }
     }
 
     public SerialPort getSerialPort() {
         return serialPort;
-    }
-
-
-    @Override
-    public int getPacketSize() {
-        return this.getPacketSize();
-    }//
-
-    @Override
-    public int getListeningEvents() {
-        return this.getListeningEvents();
-    }
-
-    @Override
-    public void serialEvent(SerialPortEvent event) {
-        byte[] newData = event.getReceivedData();
-        String str = new String(newData).split("\n", 2)[0].replaceAll("\\s+", "");
-        int byteSize = 0;
-        try {
-            byteSize = str.getBytes("UTF-8").length;
-        } catch (UnsupportedEncodingException ex) {
-
-        }
-        if (byteSize == this.PACKET_SIZE_IN_BYTES) {
-            //System.out.println("(Received data of size: " + byteSize + ")" + str);
-            System.out.println("Received data: " + str);
-        }
     }
 
 }

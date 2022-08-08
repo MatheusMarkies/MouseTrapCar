@@ -1,5 +1,6 @@
 package com.matheusmarkies;
 
+import com.matheusmarkies.manager.MouseTrapCarManager;
 import com.matheusmarkies.popup.ConnectPopUpController;
 import com.matheusmarkies.serialport.SerialReadder;
 import javafx.event.ActionEvent;
@@ -19,6 +20,8 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class MainFrameController implements Initializable {
+
+    MouseTrapCarManager mouseTrapCarManager;
 
     @FXML
     private ResourceBundle resources;
@@ -59,7 +62,8 @@ public class MainFrameController implements Initializable {
 
             ConnectPopUpController connectPopUpController = (ConnectPopUpController)fxmlLoader.getController();
 
-            connectPopUpController.setSerialReadder(serialReadder);
+            connectPopUpController.setMouseTrapCarManager(this.mouseTrapCarManager);
+            connectPopUpController.setSerialReadder(this.serialReadder);
 
             Stage stage = new Stage();
             stage.setTitle("Conectar");
@@ -69,6 +73,14 @@ public class MainFrameController implements Initializable {
         } catch (IOException ignored) {
             System.err.println(ignored);
         }
+    }
+
+    public void setMouseTrapCarManager(MouseTrapCarManager mouseTrapCarManager) {
+        this.mouseTrapCarManager = mouseTrapCarManager;
+    }
+
+    public MouseTrapCarManager getMouseTrapCarManager() {
+        return mouseTrapCarManager;
     }
 
 }

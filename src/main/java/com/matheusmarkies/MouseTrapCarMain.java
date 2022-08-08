@@ -1,5 +1,6 @@
 package com.matheusmarkies;
 
+import com.matheusmarkies.manager.MouseTrapCarManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,7 +12,7 @@ import static javafx.application.Application.launch;
 public class MouseTrapCarMain extends Application {
     static Scene scene;
 
-    public static MainFrameManager bridgeManager = new MainFrameManager();
+    public static MouseTrapCarManager bridgeManager = new MouseTrapCarManager();
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -24,6 +25,7 @@ public class MouseTrapCarMain extends Application {
         Scene scene = new Scene(root);
 
         MainFrameController controller = fxmlMain.getController();
+        controller.setMouseTrapCarManager(new MouseTrapCarManager());
 
         stage.setTitle("Mouse Trap Car");
 

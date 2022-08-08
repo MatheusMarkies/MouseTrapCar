@@ -41,7 +41,7 @@ public class SerialRunnable implements SerialPortPacketListener {
         byte[] newData = new byte[port.bytesAvailable()];
 
         String inputString = new String(newData, StandardCharsets.UTF_8);
-
+        System.out.println("Input data: "+inputString);
         switch (inputString){
             case "RPM:":
                 readType = ReadType.RPM;

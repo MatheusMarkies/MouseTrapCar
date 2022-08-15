@@ -5,6 +5,7 @@ import com.fazecast.jSerialComm.SerialPortEvent;
 import com.fazecast.jSerialComm.SerialPortPacketListener;
 import com.matheusmarkies.manager.MouseTrapCarManager;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class SerialRunnable implements SerialPortPacketListener {
@@ -33,7 +34,7 @@ public class SerialRunnable implements SerialPortPacketListener {
 
     ReadType readType = null;
     boolean getReadType = true;
-
+    private final byte[] buffer = new byte[2048];
     @Override
     public void serialEvent(SerialPortEvent event) {
         if (event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE)
@@ -41,7 +42,8 @@ public class SerialRunnable implements SerialPortPacketListener {
         byte[] newData = new byte[port.bytesAvailable()];
 
         String inputString = new String(newData, StandardCharsets.UTF_8);
-        System.out.println("Input data: "+inputString);
+        System.out.println("Input data: "+newData.length);
+
         switch (inputString){
             case "RPM:":
                 readType = ReadType.RPM;
@@ -66,5 +68,7 @@ public class SerialRunnable implements SerialPortPacketListener {
         }
 
     }
-
+    public static double toDouble(byte[] bytes) {
+        return ByteBuffer.wrap(bytes).getDouble();
+    }
 }

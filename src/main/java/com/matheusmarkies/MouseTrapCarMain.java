@@ -12,8 +12,6 @@ import static javafx.application.Application.launch;
 public class MouseTrapCarMain extends Application {
     static Scene scene;
 
-    public static MouseTrapCarManager bridgeManager = new MouseTrapCarManager();
-
     @Override
     public void start(Stage stage) throws Exception {
 
@@ -25,7 +23,7 @@ public class MouseTrapCarMain extends Application {
         Scene scene = new Scene(root);
 
         MainFrameController controller = fxmlMain.getController();
-        controller.setMouseTrapCarManager(new MouseTrapCarManager());
+        //controller.setMouseTrapCarManager(new MouseTrapCarManager());
 
         stage.setTitle("Mouse Trap Car");
 

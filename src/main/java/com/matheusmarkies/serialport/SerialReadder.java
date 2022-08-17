@@ -2,6 +2,7 @@ package com.matheusmarkies.serialport;
 
 import com.fazecast.jSerialComm.SerialPort;
 import com.matheusmarkies.manager.MouseTrapCarManager;
+import javafx.application.Platform;
 
 public class SerialReadder{
 
@@ -38,7 +39,10 @@ public class SerialReadder{
             serialPort.openPort();
 
             serialPort.setBaudRate(SerialReadder.PORT_RATE);
-            serialPort.addDataListener(new SerialRunnable(serialPort, mouseTrapCarManager));
+
+            Platform.runLater(
+                    new SerialRunnable(serialPort, mouseTrapCarManager)
+                );
 
             return serialPort.isOpen();
         }

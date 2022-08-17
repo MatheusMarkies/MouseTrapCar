@@ -4,14 +4,25 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortEvent;
 import com.fazecast.jSerialComm.SerialPortPacketListener;
 import com.matheusmarkies.manager.MouseTrapCarManager;
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.chart.XYChart;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Scanner;
 
-public class SerialRunnable implements SerialPortPacketListener {
+public class SerialRunnable implements SerialPortPacketListener, Runnable {
 
     private final SerialPort port;
     private final MouseTrapCarManager mouseTrapCarManager;
+
+    //int oldSize = 0;
+    //ObservableList<XYChart.Data> data = FXCollections.observableArrayList();
 
     public SerialRunnable(SerialPort port, MouseTrapCarManager mouseTrapCarManager) {
         this.port = port;
@@ -28,6 +39,12 @@ public class SerialRunnable implements SerialPortPacketListener {
         return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
     }
 
+    @Override
+    public void run() {
+        port.addDataListener(this);
+        mouseTrapCarManager.getMainFrameController().getSeries().getData().add(new XYChart.Data<String,Double>("0",0.));
+    }
+
     enum ReadType{
         RPM
     }
@@ -35,36 +52,55 @@ public class SerialRunnable implements SerialPortPacketListener {
     ReadType readType = null;
     boolean getReadType = true;
     private final byte[] buffer = new byte[2048];
+
     @Override
     public void serialEvent(SerialPortEvent event) {
         if (event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE)
             return;
-        byte[] newData = new byte[port.bytesAvailable()];
+        byte[] buffer = new byte[port.bytesAvailable()];
 
-        String inputString = new String(newData, StandardCharsets.UTF_8);
-        System.out.println("Input data: "+newData.length);
+        String inputString = new String(buffer, StandardCharsets.UTF_16LE);
 
-        switch (inputString){
-            case "RPM:":
-                readType = ReadType.RPM;
-                getReadType = false;
-                break;
+        Scanner scanner_stream=  new Scanner( port.getInputStream());
+        while(scanner_stream.hasNextLine()) {
+            String received_string = scanner_stream.nextLine();
 
-            default:
-                if(getReadType)
-                    readType = null;
+            int received_str_len = received_string.length();
+            inputString = received_string;
 
-                if(readType != null)
-                    switch (readType)
-                    {
-                        case RPM:
-                            double RPM = Double.parseDouble(inputString);
-                            mouseTrapCarManager.addEntityRpmList(RPM);
-                            System.out.println("RPM: "+RPM);
-                            getReadType = true;
-                            break;
-                    }
-                break;
+            //System.out.println("Input data: " + inputString);
+
+            try {
+                switch (inputString) {
+                    case "R:":
+                        readType = ReadType.RPM;
+                        getReadType = false;
+                        break;
+
+                    default:
+                        if (getReadType)
+                            readType = null;
+
+                        if (readType != null)
+                            switch (readType) {
+                                case RPM:
+                                    double RPM = Double.parseDouble(inputString);
+                                    MouseTrapCarManager.Rotations rpm = mouseTrapCarManager.addEntityRpmList(RPM);
+                                    if(RPM != 0.0) {
+                                        XYChart.Data data = mouseTrapCarManager.addEntityToLineChart(rpm);
+
+                                        //data.add(mouseTrapCarManager.addEntityToLineChart(rpm));
+                                        mouseTrapCarManager.getMainFrameController().getSeries().getData().add(data);
+                                        System.out.println("R: " + rpm.toString());
+                                    }
+
+                                    getReadType = true;
+                                    break;
+                            }
+                        break;
+                }
+            }catch (Exception exception){//System.err.println(exception);
+                 }
         }
 
     }

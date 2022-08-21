@@ -42,7 +42,7 @@ public class SerialRunnable implements SerialPortPacketListener, Runnable {
     @Override
     public void run() {
         port.addDataListener(this);
-        mouseTrapCarManager.getMainFrameController().getSeries().getData().add(new XYChart.Data<String,Double>("0",0.));
+        //mouseTrapCarManager.getMainFrameController().getRotationSeries().getData().add(new XYChart.Data<String,Double>("0",0.));
     }
 
     enum ReadType{
@@ -85,14 +85,18 @@ public class SerialRunnable implements SerialPortPacketListener, Runnable {
                             switch (readType) {
                                 case RPM:
                                     double RPM = Double.parseDouble(inputString);
-                                    MouseTrapCarManager.Rotations rpm = mouseTrapCarManager.addEntityRpmList(RPM);
-                                    if(RPM != 0.0) {
-                                        XYChart.Data data = mouseTrapCarManager.addEntityToLineChart(rpm);
+                                    MouseTrapCarManager.Rotations rotation = mouseTrapCarManager.addEntityRotationsList(Math.abs(RPM));
 
-                                        //data.add(mouseTrapCarManager.addEntityToLineChart(rpm));
-                                        mouseTrapCarManager.getMainFrameController().getSeries().getData().add(data);
-                                        System.out.println("R: " + rpm.toString());
-                                    }
+                                if(rotation != null)
+                                    if(RPM != 0.0 && Double.isFinite(rotation.rpm)) {
+                                        XYChart.Data data = mouseTrapCarManager.addEntityToRotationsChart(rotation);
+                                        if(data!=null)
+                                        mouseTrapCarManager.getMainFrameController().getRotationSeries().getData().add(data);
+                                        mouseTrapCarManager.getMainFrameController().chartRefresh(true);
+
+                                        System.out.println("R: " + rotation.toString());
+                                    }else
+                                        mouseTrapCarManager.getMainFrameController().chartRefresh(false);
 
                                     getReadType = true;
                                     break;

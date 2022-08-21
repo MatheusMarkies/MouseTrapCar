@@ -13,54 +13,80 @@ public class MouseTrapCarManager{
 
     private MainFrameController mainFrameController;
 
-    public class Rotations {
-        public double RPMValue;
-        public Date RPMTime = new Date();
+    public static class Rotations {
+        public double rotationValue;
+        public Date addedTime = new Date();
+        public double deltaTime = 0;
+
+        public double rpm;
+
+        public Rotations(){ }
+
+        public Rotations(double rotationValue, double deltaTime,double rpm){
+            this.deltaTime = deltaTime;
+            this.rpm = rpm;
+            this.rotationValue = rotationValue;
+        }
 
         @Override
         public String toString() {
             return "Rotations{" +
-                    "Rotations Value=" + RPMValue +
-                    ", Rotations Delta Time=" + RPMTime +
+                    "Rotations Value=" + rotationValue +
+                    ", Delta Time=" + deltaTime +
+                    ", Rotations Per Minutes=" + rpm +
+                    ", Rotations Added Time=" + addedTime +
                     '}';
         }
     }
 
-    private List<Rotations> rpmHistory = new ArrayList<>();
+    private List<Rotations> rotationsHistory = new ArrayList<>();
 
-    public Rotations addEntityRpmList(double entity){
-        Rotations rpm = new Rotations();
-        rpm.RPMValue = entity;
+    public Rotations addEntityRotationsList(double entity){
+        try {
+            Rotations rpm = new Rotations();
+            rpm.rotationValue = entity;
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
-        LocalTime localTimeNow = LocalTime.now();
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+            LocalTime localTimeNow = LocalTime.now();
 
-        LocalDateTime localTime = localTimeNow.atDate(LocalDate.now());
+            LocalDateTime localTime = localTimeNow.atDate(LocalDate.now());
 
-        Instant instant = localTime.atZone(ZoneId.systemDefault()).toInstant();
+            Instant instant = localTime.atZone(ZoneId.systemDefault()).toInstant();
 
-        rpm.RPMTime = (Date.from(instant));
-        addEntityToLineChart(rpm);
+            rpm.addedTime = (Date.from(instant));
 
-        return rpm;
+            double deltaTimeComparedToPrevious = 0;
+            double deltaTime = 0;
+            if (rotationsHistory.size() > 0) {
+                deltaTime = (double)(rpm.addedTime.getTime() - rotationsHistory.get(0).addedTime.getTime())/1000;
+                deltaTime = (double) Math.round(deltaTime * 100)/100;
+                //deltaTimeComparedToPrevious = (double)(deltaTime - rotationsHistory.get(rotationsHistory.size()-1).deltaTime);
+            }
+
+            rpm.deltaTime = deltaTime;
+            rpm.rpm = (entity/0.1) * 60;
+
+            if(Double.isFinite(rpm.rpm))
+            addEntityToRotationsChart(rpm);
+
+            return rpm;
+        }catch (Exception e){ System.err.println(e); }
+        return null;
     }
 
-    public XYChart.Data<String, Double> addEntityToLineChart(Rotations r){
+    public XYChart.Data<String, Double> addEntityToRotationsChart(Rotations r){
         try {
             if (mainFrameController != null) {
-                mainFrameController.getLineChart().setTitle("RPM/Time");
-
                 XYChart.Data data = new XYChart.Data<Double, Integer>();
 
-                int timeDelta = 0;
+                data = new XYChart.Data<String, Double>((double) r.deltaTime + "", r.rotationValue);
 
-                if(rpmHistory.size() > 0)
-                timeDelta = (int) ((r.RPMTime.getTime() - rpmHistory.get(0).RPMTime.getTime())/1000);
+                rotationsHistory.add(r);
 
-                data = new XYChart.Data<String, Double>((double) timeDelta + "", r.RPMValue);
-
-                rpmHistory.add(r);
-                return data;
+                //if(r.deltaTime.getSeconds() != rotationsHistory.get(rotationsHistory.size()-1).deltaTime.getSeconds())
+                    return data;
+                //else
+                    //return null;
             }
         }catch (Exception exception){System.err.println(exception);}
     return null;
@@ -72,8 +98,8 @@ public class MouseTrapCarManager{
         this.mainFrameController = mainFrameController;
     }
 
-    public List<Rotations> getRpmHistory() {
-        return rpmHistory;
+    public List<Rotations> getRotationsHistory() {
+        return rotationsHistory;
     }
     public MainFrameController getMainFrameController() {
         return mainFrameController;

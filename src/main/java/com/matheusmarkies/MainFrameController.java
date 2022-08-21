@@ -1,13 +1,10 @@
 package com.matheusmarkies;
 
 import com.matheusmarkies.manager.MouseTrapCarManager;
+import com.matheusmarkies.objects.Car;
+import com.matheusmarkies.popup.CarSettingsController;
 import com.matheusmarkies.popup.ConnectPopUpController;
 import com.matheusmarkies.serialport.SerialReadder;
-import com.matheusmarkies.serialport.SerialRunnable;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -21,7 +18,6 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.URL;
@@ -44,7 +40,7 @@ public class MainFrameController implements Initializable {
     final NumberAxis yAxis = new NumberAxis();
 
     @FXML
-    private LineChart<String, Double> line_chart;
+    private LineChart<String, Double> rotation_chart;
 
     @FXML
     private MenuItem specifications_menu_button;
@@ -52,17 +48,22 @@ public class MainFrameController implements Initializable {
     @FXML
     private MenuBar menu_bar;
 
-    XYChart.Series<String, Double> series = new XYChart.Series<String, Double>();
+    XYChart.Series<String, Double> rotationSeries = new XYChart.Series<String, Double>();
+    private Car car;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        line_chart.setTitle("RPM/Time");
+        rotation_chart.setTitle("Rotation/Time");
 
-        series.setName("Data Series");
+        rotationSeries.setName("Data Series");
 
-        line_chart.getXAxis().setLabel("Tempo (s)");
-        line_chart.getYAxis().setLabel("RPM");
-        line_chart.getData().addAll(series);
+        rotation_chart.getXAxis().setLabel("Tempo (s)");
+        rotation_chart.getYAxis().setLabel("Rotacoes");
+        rotation_chart.getData().addAll(rotationSeries);
+
+        rotation_chart.setCreateSymbols(false);
+
+        rotation_chart.getStyleClass().add("chart");
 
         connect_menu_button.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
@@ -80,7 +81,7 @@ public class MainFrameController implements Initializable {
 
     @FXML
     void onClickInSpecificationsButton(ActionEvent event) {
-
+        openCarSettingsPopUp();
     }
 
     void openConnectPopUp(){
@@ -104,6 +105,36 @@ public class MainFrameController implements Initializable {
         }
     }
 
+    void openCarSettingsPopUp() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(
+                    "/com/matheusmarkies/mousetrapcar/CarSettings.fxml"));
+            Parent root = fxmlLoader.load();
+
+            CarSettingsController carSettingsController = (CarSettingsController) fxmlLoader.getController();
+            carSettingsController.setMainFrameController(this);
+
+            Stage stage = new Stage();
+            stage.setTitle("Predefinicoes");
+            stage.setScene(new Scene(root));
+
+            stage.show();
+        } catch (IOException ignored) {
+            System.err.println(ignored);
+        }
+    }
+
+    private boolean chartRefresh;
+    public void chartRefresh(boolean b){
+        if(!chartRefresh && b){
+        //Start Reciver Samples
+        }
+        if(chartRefresh && !b){
+        //Stop Reciver Samples
+        }
+        chartRefresh = b;
+    }
+
     public void setMouseTrapCarManager(MouseTrapCarManager mouseTrapCarManager) {
         this.mouseTrapCarManager = mouseTrapCarManager;
         this.mouseTrapCarManager.setMainFrameController(this);
@@ -114,14 +145,18 @@ public class MainFrameController implements Initializable {
     }
 
     public LineChart<?, ?> getLineChart() {
-        return line_chart;
+        return rotation_chart;
     }
 
-    public XYChart.Series<String, Double> getSeries() {
-        return series;
+    public XYChart.Series<String, Double> getRotationSeries() {
+        return rotationSeries;
     }
 
     public SerialReadder getSerialReadder() {
         return serialReadder;
     }
+
+    public Car getCar() { return car; }
+
+    public void setCar(Car car) { this.car = car; }
 }

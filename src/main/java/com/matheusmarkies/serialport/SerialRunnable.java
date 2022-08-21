@@ -3,30 +3,24 @@ package com.matheusmarkies.serialport;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortEvent;
 import com.fazecast.jSerialComm.SerialPortPacketListener;
-import com.matheusmarkies.manager.MouseTrapCarManager;
-import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import com.matheusmarkies.manager.RotationManager;
 import javafx.scene.chart.XYChart;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
 import java.util.Scanner;
 
 public class SerialRunnable implements SerialPortPacketListener, Runnable {
 
     private final SerialPort port;
-    private final MouseTrapCarManager mouseTrapCarManager;
+    private final RotationManager rotationManager;
 
     //int oldSize = 0;
     //ObservableList<XYChart.Data> data = FXCollections.observableArrayList();
 
-    public SerialRunnable(SerialPort port, MouseTrapCarManager mouseTrapCarManager) {
+    public SerialRunnable(SerialPort port, RotationManager rotationManager) {
         this.port = port;
-        this.mouseTrapCarManager = mouseTrapCarManager;
+        this.rotationManager = rotationManager;
     }
 
     @Override
@@ -78,25 +72,26 @@ public class SerialRunnable implements SerialPortPacketListener, Runnable {
                         break;
 
                     default:
-                        if (getReadType)
+                        if (getReadType) {
                             readType = null;
-
+                        }
                         if (readType != null)
                             switch (readType) {
                                 case RPM:
                                     double RPM = Double.parseDouble(inputString);
-                                    MouseTrapCarManager.Rotations rotation = mouseTrapCarManager.addEntityRotationsList(Math.abs(RPM));
+                                    RotationManager.Rotations rotation = rotationManager.addEntityRotationsList(Math.abs(RPM));
 
-                                if(rotation != null)
-                                    if(RPM != 0.0 && Double.isFinite(rotation.rpm)) {
-                                        XYChart.Data data = mouseTrapCarManager.addEntityToRotationsChart(rotation);
-                                        if(data!=null)
-                                        mouseTrapCarManager.getMainFrameController().getRotationSeries().getData().add(data);
-                                        mouseTrapCarManager.getMainFrameController().chartRefresh(true);
+                                    if (rotation != null)
+                                        if (RPM != 0.0 && Double.isFinite(rotation.rpm)) {
+                                            rotationManager.getRotationsHistory().add(rotation);
+                                            XYChart.Data data = rotationManager.addEntityToRotationsChart(rotation);
+                                            if (data != null)
+                                                //rotationManager.getMainFrameController().getRotationSeries().getData().add(data);
+                                                rotationManager.getMainFrameController().chartRefresh(true);
 
-                                        System.out.println("R: " + rotation.toString());
-                                    }else
-                                        mouseTrapCarManager.getMainFrameController().chartRefresh(false);
+                                            System.out.println(rotation.toString());
+                                        } else
+                                            rotationManager.getMainFrameController().chartRefresh(false);
 
                                     getReadType = true;
                                     break;

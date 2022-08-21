@@ -1,12 +1,12 @@
 package com.matheusmarkies.serialport;
 
 import com.fazecast.jSerialComm.SerialPort;
-import com.matheusmarkies.manager.MouseTrapCarManager;
+import com.matheusmarkies.manager.RotationManager;
 import javafx.application.Platform;
 
 public class SerialReadder{
 
-    final MouseTrapCarManager mouseTrapCarManager;
+    final RotationManager rotationManager;
 
     private SerialPort serialPort;
     private String serialPortName;
@@ -14,14 +14,14 @@ public class SerialReadder{
     static int PORT_RATE = 9600;
     public static int PACKET_SIZE_IN_BYTES = 8;
 
-    public SerialReadder(MouseTrapCarManager mouseTrapCarManager, String serialPortName) {
-        this.mouseTrapCarManager = mouseTrapCarManager;
+    public SerialReadder(RotationManager rotationManager, String serialPortName) {
+        this.rotationManager = rotationManager;
         this.serialPortName = serialPortName;
     }
 
     public SerialReadder(){
         super();
-        mouseTrapCarManager = null;
+        rotationManager = null;
     }
 
     public boolean connect(){
@@ -41,7 +41,7 @@ public class SerialReadder{
             serialPort.setBaudRate(SerialReadder.PORT_RATE);
 
             Platform.runLater(
-                    new SerialRunnable(serialPort, mouseTrapCarManager)
+                    new SerialRunnable(serialPort, rotationManager)
                 );
 
             return serialPort.isOpen();

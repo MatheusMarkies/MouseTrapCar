@@ -6,7 +6,7 @@ import java.io.*;
 
 public class Save {
 
-    public static String ApplicationFolder = System.getenv("LOCALAPPDATA") + "\\Mouse Trap Car";
+    public static String ApplicationFolder = System.getenv("APPDATA") + "\\Mouse Trap Car";
 
     public static void saveCarSettings(Car car) throws IOException {
             File selectedFile = new File(ApplicationFolder + "\\CarSettings.car");

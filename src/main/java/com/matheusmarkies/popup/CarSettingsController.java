@@ -34,9 +34,6 @@ public class CarSettingsController implements Initializable {
             double wheelDiameter = Double.parseDouble(wheel_diameter_inputfield.getText());
 
             Car car = new Car(wheelDiameter);
-            
-            if(mainFrameController!=null)
-                mainFrameController.setCar(car);
 
             Save.saveCarSettings(car);
             System.out.println("Salvando...");
@@ -48,7 +45,7 @@ public class CarSettingsController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            wheel_diameter_inputfield.setText(mainFrameController.getCar().getWheelDiameter() + "");
+           wheel_diameter_inputfield.setText(Save.openCarPresets().getWheelDiameter() + "");
         }catch (Exception exception){System.err.println(exception);}
     }
 

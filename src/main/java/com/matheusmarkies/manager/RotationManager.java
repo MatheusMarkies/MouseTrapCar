@@ -9,12 +9,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MouseTrapCarManager{
+public class RotationManager {
 
     private MainFrameController mainFrameController;
 
     public static class Rotations {
         public double rotationValue;
+        public double speed;
         public Date addedTime = new Date();
         public double deltaTime = 0;
 
@@ -32,6 +33,7 @@ public class MouseTrapCarManager{
         public String toString() {
             return "Rotations{" +
                     "Rotations Value=" + rotationValue +
+                    ", Speed=" + speed +
                     ", Delta Time=" + deltaTime +
                     ", Rotations Per Minutes=" + rpm +
                     ", Rotations Added Time=" + addedTime +
@@ -65,9 +67,8 @@ public class MouseTrapCarManager{
 
             rpm.deltaTime = deltaTime;
             rpm.rpm = (entity/0.1) * 60;
-
-            if(Double.isFinite(rpm.rpm))
-            addEntityToRotationsChart(rpm);
+            rpm.speed = (entity/0.1) * Math.PI *(mainFrameController.getCar().getWheelDiameter()/100);
+            rpm.speed = (double) Math.round(rpm.speed * 100)/100;
 
             return rpm;
         }catch (Exception e){ System.err.println(e); }
@@ -92,9 +93,9 @@ public class MouseTrapCarManager{
     return null;
     }
 
-    public MouseTrapCarManager() { }
+    public RotationManager() { }
 
-    public MouseTrapCarManager(MainFrameController mainFrameController) {
+    public RotationManager(MainFrameController mainFrameController) {
         this.mainFrameController = mainFrameController;
     }
 

@@ -1,6 +1,5 @@
 package com.matheusmarkies;
 
-import com.matheusmarkies.manager.MouseTrapCarManager;
 import com.matheusmarkies.manager.utilities.Save;
 import com.matheusmarkies.objects.Car;
 import javafx.application.Application;
@@ -20,7 +19,7 @@ public class MouseTrapCarMain extends Application {
     Car car = new Car();
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) throws IOException, ClassNotFoundException {
 
         FXMLLoader fxmlMain = new FXMLLoader(MouseTrapCarMain.class.getResource(
                 "/com/matheusmarkies/mousetrapcar/MainFrame.fxml"));
@@ -31,26 +30,20 @@ public class MouseTrapCarMain extends Application {
 
         File applicationFolder = new File(Save.ApplicationFolder);
 
-        try {
             if (!applicationFolder.exists()) {
-
-                applicationFolder.createNewFile();
-
+                applicationFolder.mkdirs();
             } else {
-                File carFile = new File(Save.ApplicationFolder + "\\CarSettings.car");
+                File carFile = new File(applicationFolder.getAbsolutePath() + "\\CarSettings.car");
                 if (carFile.exists())
                     car = Save.openCarPresets();
+                else {
+                    carFile.createNewFile();
+                    car = new Car();
+                    Save.saveCarSettings(car);
+                }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
 
         MainFrameController controller = fxmlMain.getController();
-
-        if(car == null)
-            car = new Car();
 
         controller.setCar(car);
         //controller.setMouseTrapCarManager(new MouseTrapCarManager());
@@ -60,7 +53,7 @@ public class MouseTrapCarMain extends Application {
         scene.getStylesheets().add("/com/matheusmarkies/mousetrapcar/MainFrameCSS.css");
 
         stage.setScene(scene);
-        stage.setMaximized(false);
+        stage.setMaximized(true);
         stage.show();
 
         MainFrameController FXML_Start = new MainFrameController();

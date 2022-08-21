@@ -1,10 +1,14 @@
 package com.matheusmarkies;
 
-import com.matheusmarkies.manager.MouseTrapCarManager;
+import com.matheusmarkies.manager.RotationManager;
+import com.matheusmarkies.manager.analysis.ChartIntegration;
+import com.matheusmarkies.manager.utilities.Save;
 import com.matheusmarkies.objects.Car;
 import com.matheusmarkies.popup.CarSettingsController;
 import com.matheusmarkies.popup.ConnectPopUpController;
 import com.matheusmarkies.serialport.SerialReadder;
+import com.matheusmarkies.serialport.SerialRunnable;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -19,13 +23,14 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class MainFrameController implements Initializable {
 
-    MouseTrapCarManager mouseTrapCarManager = new MouseTrapCarManager(this);
+    RotationManager rotationManager = new RotationManager(this);
 
     @FXML
     private ResourceBundle resources;
@@ -43,27 +48,61 @@ public class MainFrameController implements Initializable {
     private LineChart<String, Double> rotation_chart;
 
     @FXML
+    private LineChart<String, Double> speed_chart;
+
+    @FXML
+    private LineChart<String, Double> corrention_curve_chart;
+
+    @FXML
+    private LineChart<String, Double> average_chart;
+
+    @FXML
     private MenuItem specifications_menu_button;
 
     @FXML
     private MenuBar menu_bar;
 
-    XYChart.Series<String, Double> rotationSeries = new XYChart.Series<String, Double>();
+    private ChartIntegration chartIntegration = new ChartIntegration();
+
     private Car car;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         rotation_chart.setTitle("Rotation/Time");
 
-        rotationSeries.setName("Data Series");
+        chartIntegration =  new ChartIntegration(this);
+
+        chartIntegration.getRotationSeries().setName("Rotacoes");
+        chartIntegration.getAverageSeries().setName("Media");
+        chartIntegration.getSmoothedSeries().setName("Curva Media");
+        chartIntegration.getFrequecySeries().setName("Amplitude");
 
         rotation_chart.getXAxis().setLabel("Tempo (s)");
-        rotation_chart.getYAxis().setLabel("Rotacoes");
-        rotation_chart.getData().addAll(rotationSeries);
+        rotation_chart.getYAxis().setLabel("RPS");
+
+        average_chart.getXAxis().setLabel("Tempo (s)");
+        average_chart.getYAxis().setLabel("Velocidade (m/s)");
+
+        corrention_curve_chart.getXAxis().setLabel("Tempo (s)");
+        corrention_curve_chart.getYAxis().setLabel("Velocidade (m/s)");
+
+        speed_chart.getXAxis().setLabel("Tempo (s)");
+        speed_chart.getYAxis().setLabel("Velocidade (m/s)");
+
+        rotation_chart.getData().addAll(chartIntegration.getRotationSeries());
+        average_chart.getData().addAll(chartIntegration.getAverageSeries());
+        corrention_curve_chart.getData().addAll(chartIntegration.getSmoothedSeries());
+        speed_chart.getData().addAll(chartIntegration.getFrequecySeries());
 
         rotation_chart.setCreateSymbols(false);
+        speed_chart.setCreateSymbols(false);
+        average_chart.setCreateSymbols(false);
+        corrention_curve_chart.setCreateSymbols(false);
 
         rotation_chart.getStyleClass().add("chart");
+        speed_chart.getStyleClass().add("chart");
+        average_chart.getStyleClass().add("chart");
+        corrention_curve_chart.getStyleClass().add("chart");
 
         connect_menu_button.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
@@ -92,7 +131,7 @@ public class MainFrameController implements Initializable {
 
             ConnectPopUpController connectPopUpController = (ConnectPopUpController)fxmlLoader.getController();
 
-            connectPopUpController.setMouseTrapCarManager(this.mouseTrapCarManager);
+            connectPopUpController.setMouseTrapCarManager(this.rotationManager);
             connectPopUpController.setSerialReadder(this.serialReadder);
 
             Stage stage = new Stage();
@@ -124,39 +163,59 @@ public class MainFrameController implements Initializable {
         }
     }
 
+    boolean seriesAdded = false;
+
     private boolean chartRefresh;
+    private int rotationHistoryIndex = 0;
     public void chartRefresh(boolean b){
+        if (rotationManager.getRotationsHistory().size() > 0)
+            if (rotationHistoryIndex != rotationManager.getRotationsHistory().size()) {
+                chartIntegration.setAnalysisToChart(0);
+                rotationHistoryIndex = rotationManager.getRotationsHistory().size();
+            }
+
         if(!chartRefresh && b){
         //Start Reciver Samples
+            System.out.println("Start Reciver Samples");
+            if(!seriesAdded) {
+                chartIntegration.reset();
+                seriesAdded = false;
+            }
         }
-        if(chartRefresh && !b){
-        //Stop Reciver Samples
+        if(chartRefresh && !b) {
+            //Stop Reciver Sample
+            System.out.println("Stop Reciver Samples");
+            if (rotationManager.getRotationsHistory().size() > 0)
+                if (rotationHistoryIndex != rotationManager.getRotationsHistory().size()) {
+                    //chartIntegration.setAnalysisToChart(0);
+                    rotationHistoryIndex = rotationManager.getRotationsHistory().size();
+                }
         }
         chartRefresh = b;
     }
 
-    public void setMouseTrapCarManager(MouseTrapCarManager mouseTrapCarManager) {
-        this.mouseTrapCarManager = mouseTrapCarManager;
-        this.mouseTrapCarManager.setMainFrameController(this);
+    public void setMouseTrapCarManager(RotationManager rotationManager) {
+        this.rotationManager = rotationManager;
+        this.rotationManager.setMainFrameController(this);
     }
 
-    public MouseTrapCarManager getMouseTrapCarManager() {
-        return mouseTrapCarManager;
+    public RotationManager getMouseTrapCarManager() {
+        return rotationManager;
     }
 
-    public LineChart<?, ?> getLineChart() {
+    public LineChart<String, Double> getLineChart() {
         return rotation_chart;
     }
 
     public XYChart.Series<String, Double> getRotationSeries() {
-        return rotationSeries;
+        return chartIntegration.getRotationSeries();
     }
 
     public SerialReadder getSerialReadder() {
         return serialReadder;
     }
 
-    public Car getCar() { return car; }
+    public Car getCar() throws IOException, ClassNotFoundException { return Save.openCarPresets(); }
 
     public void setCar(Car car) { this.car = car; }
 }

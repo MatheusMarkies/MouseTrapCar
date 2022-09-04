@@ -2,6 +2,7 @@ package com.matheusmarkies.manager.analysis;
 
 import com.matheusmarkies.MainFrameController;
 import com.matheusmarkies.manager.RotationManager;
+import com.matheusmarkies.manager.utilities.Vector2D;
 import javafx.scene.chart.XYChart;
 
 import java.util.ArrayList;
@@ -13,9 +14,18 @@ public class ChartIntegration implements Runnable{
     private XYChart.Series<String, Double> rotationSeries = new XYChart.Series<String, Double>();
     private XYChart.Series<String, Double> averageSeries = new XYChart.Series<String, Double>();
     private XYChart.Series<String, Double> smoothedSeries = new XYChart.Series<String, Double>();
-    private XYChart.Series<String, Double> frequecySeries = new XYChart.Series<String, Double>();
+
+    public class MovementDetailsChart {
+        public XYChart.Series<String, Double> acceleratedSeries = new XYChart.Series<String, Double>();
+        public XYChart.Series<String, Double> constantSeries = new XYChart.Series<String, Double>();
+        public XYChart.Series<String, Double> retardedSeries = new XYChart.Series<String, Double>();
+    }
+
+    private MovementDetailsChart movementDetailsChart = new MovementDetailsChart();
 
     private MainFrameController mainFrameController;
+
+    enum ColumnType{ROTATION,SPEED,TIME,RPM}
 
     public ChartIntegration(){ }
 
@@ -33,50 +43,39 @@ public class ChartIntegration implements Runnable{
     public void setAnalysisToChart(int sampleIndex) {
         reset();
 
-        rotationSeries.getData().addAll(addEntityToRotationChart());
-        averageSeries.getData().addAll(addEntityToAverageChart());
-        smoothedSeries.getData().addAll(addEntityToSmoothedChart());
-        frequecySeries.getData().addAll(addFrequencyCurve());
-        System.out.println();
-        System.out.println("Rotation: "+mainFrameController.getMouseTrapCarManager().getRotationsHistory().size());
-        System.out.println("Average: "+addEntityToAverageChart().size());
-        System.out.println("Smoothed: "+addEntityToSmoothedChart().size());
+        rotationSeries.getData().addAll(addEntityToAverageChart(ColumnType.TIME,ColumnType.ROTATION));
+        rotationSeries.setName("Rotacao");
+        averageSeries.getData().addAll(addEntityToDistanceAverageChart());
+        averageSeries.setName("Distancia");
+        smoothedSeries.getData().addAll(addEntityToSmoothedChart(ColumnType.TIME,ColumnType.SPEED));
+        smoothedSeries.setName("Velocidade");
+        movementDetailsChart.acceleratedSeries.getData().addAll(addMovementDetailsCurve().get(0));
+        movementDetailsChart.constantSeries.getData().addAll(addMovementDetailsCurve().get(1));
+        movementDetailsChart.retardedSeries.getData().addAll(addMovementDetailsCurve().get(2));
     }
 
     public void reset() {
         rotationSeries.getData().clear();
         averageSeries.getData().clear();
         smoothedSeries.getData().clear();
-        frequecySeries.getData().clear();
+        movementDetailsChart.acceleratedSeries.getData().clear();
+        movementDetailsChart.constantSeries.getData().clear();
+        movementDetailsChart.retardedSeries.getData().clear();
     }
 
-    public Collection<XYChart.Data<String, Double>> addEntityToRotationChart() {
+    public Collection<XYChart.Data<String, Double>> addEntityToAverageChart(ColumnType X, ColumnType Y) {
         List<XYChart.Data<String, Double>> dataList = new ArrayList<>();
+
+        List<Vector2D> dataVector = getDataVector(X,Y);
+
         try {
-            List<RotationManager.Rotations> averageRotations = SampleAnalysis.averageSampleFilter(
-                    mainFrameController.getMouseTrapCarManager().getRotationsHistory(), 4
+            List<Vector2D> averageRotations = SampleAnalysis.averageSampleFilter(
+                    dataVector, 4
             );
 
-            for (RotationManager.Rotations rotations : mainFrameController.getMouseTrapCarManager().getRotationsHistory()) {
+            for (Vector2D rotations : averageRotations) {
                 XYChart.Data data = new XYChart.Data<Double, Integer>();
-                data = new XYChart.Data<String, Double>((double) rotations.deltaTime + "", rotations.rotationValue/0.1);
-                dataList.add(data);
-            }
-        }catch (Exception exception){System.err.println("addEntityToRotationChart "+exception);}
-
-        return dataList;
-    }
-
-    public Collection<XYChart.Data<String, Double>> addEntityToAverageChart() {
-        List<XYChart.Data<String, Double>> dataList = new ArrayList<>();
-        try {
-            List<RotationManager.Rotations> averageRotations = SampleAnalysis.averageSampleFilter(
-                    mainFrameController.getMouseTrapCarManager().getRotationsHistory(), 4
-            );
-
-            for (RotationManager.Rotations rotations : averageRotations) {
-                XYChart.Data data = new XYChart.Data<Double, Integer>();
-                data = new XYChart.Data<String, Double>((double) rotations.deltaTime + "", rotations.rotationValue);
+                data = new XYChart.Data<String, Double>((double) rotations.x() + "", rotations.y());
                 dataList.add(data);
             }
         }catch (Exception exception){System.err.println("addEntityToAverageChart "+exception);}
@@ -84,16 +83,44 @@ public class ChartIntegration implements Runnable{
         return dataList;
     }
 
-    public Collection<XYChart.Data<String, Double>> addEntityToSmoothedChart() {
+    public Collection<XYChart.Data<String, Double>> addEntityToDistanceAverageChart() {
         List<XYChart.Data<String, Double>> dataList = new ArrayList<>();
+
+        List<Vector2D> dataVector = getDataVector(ColumnType.TIME,ColumnType.ROTATION);
+        double distance = 0;
+
         try {
-            List<RotationManager.Rotations> smoothedRotations = SampleAnalysis.getSmoothChart(
-                    mainFrameController.getMouseTrapCarManager().getRotationsHistory()
+            List<Vector2D> averageRotations = SampleAnalysis.averageSampleFilter(
+                    dataVector, 4
             );
 
-            for (RotationManager.Rotations rotations : smoothedRotations) {
+            for (Vector2D rotations : averageRotations) {
                 XYChart.Data data = new XYChart.Data<Double, Integer>();
-                data = new XYChart.Data<String, Double>((double) rotations.deltaTime + "", rotations.rotationValue);
+                distance += rotations.y()
+                        * (mainFrameController.getCar().getWheelDiameter() * 2 * Math.PI) * 0.75;
+                data = new XYChart.Data<String, Double>((double)Math.round(distance*1000)/1000 + "",
+                        (double)Math.round(rotations.x()*1000)/1000);
+                dataList.add(data);
+            }
+        }catch (Exception exception){System.err.println("addEntityToAverageChart "+exception);}
+
+        return dataList;
+    }
+
+    public Collection<XYChart.Data<String, Double>> addEntityToSmoothedChart(ColumnType X, ColumnType Y) {
+        List<XYChart.Data<String, Double>> dataList = new ArrayList<>();
+
+        List<Vector2D> dataVector = getDataVector(X,Y);
+
+        try {
+            List<Vector2D>  smoothedRotations = SampleAnalysis.getSmoothChart(
+                    dataVector
+            );
+
+            for (Vector2D rotations : smoothedRotations) {
+                XYChart.Data data = new XYChart.Data<Double, Integer>();
+                data = new XYChart.Data<String, Double>((double)Math.round(rotations.y()*1000)/1000  + "",
+                        (double)Math.round(rotations.x()*1000)/1000);
                 dataList.add(data);
             }
         }catch (Exception exception){System.err.println("addEntityToSmoothedChart "+exception);}
@@ -101,21 +128,77 @@ public class ChartIntegration implements Runnable{
         return dataList;
     }
 
-    public Collection<XYChart.Data<String, Double>> addFrequencyCurve() {
-        List<XYChart.Data<String, Double>> dataList = new ArrayList<>();
+    public List<List<XYChart.Data<String, Double>>> addMovementDetailsCurve() {
+        List<List<XYChart.Data<String, Double>>> dataList = new ArrayList<>();
+        dataList.add(new ArrayList<>());
+        dataList.add(new ArrayList<>());
+        dataList.add(new ArrayList<>());
         try {
-            List<RotationManager.Rotations> smoothedRotations = SampleAnalysis.getFrequencyCurve(
-                    mainFrameController.getMouseTrapCarManager().getRotationsHistory()
+            List<Vector2D> dataVector = getDataVector(ColumnType.TIME,ColumnType.SPEED);
+            List<Vector2D>  averageSamples = SampleAnalysis.averageSampleFilter(
+                    dataVector, 1
             );
 
-            for (RotationManager.Rotations rotations : smoothedRotations) {
-                XYChart.Data data = new XYChart.Data<Double, Integer>();
-                data = new XYChart.Data<String, Double>((double) rotations.deltaTime + "", rotations.rotationValue);
-                dataList.add(data);
+            for (int i =0;i<dataVector.size();i++) {
+                XYChart.Data data = new XYChart.Data<String, Integer>();
+                data = new XYChart.Data<String, Double>(""+(double)Math.round(averageSamples.get(i).x()*1000)/1000,
+                        (double)Math.round(averageSamples.get(i).y()*1000)/1000);
+
+                int index = 0;
+
+                if(mainFrameController
+                        .getMouseTrapCarManager()
+                        .getRotationsHistory().get(i)
+                        .movementType == RotationManager.Rotations.MovementType.CONSTANT)
+                    index = 1;
+                else if(mainFrameController
+                        .getMouseTrapCarManager()
+                        .getRotationsHistory().get(i)
+                        .movementType == RotationManager.Rotations.MovementType.RETARDED)
+                    index = 2;
+
+                dataList.get(index).add(data);
             }
         }catch (Exception exception){System.err.println("addFrequencyCurve "+exception);}
 
         return dataList;
+    }
+
+    public List<Vector2D> getDataVector(ColumnType X, ColumnType Y){
+        List<Vector2D> dataVector = new ArrayList<>();
+        for (RotationManager.Rotations rotations : mainFrameController.getMouseTrapCarManager().getRotationsHistory()) {
+            Vector2D a = new Vector2D(0 , 0);
+            switch (X){
+                case RPM:
+                    a.x(rotations.rpm);
+                    break;
+                case ROTATION:
+                    a.x(rotations.rotationValue);
+                    break;
+                case TIME:
+                    a.x(rotations.deltaTime);
+                    break;
+                case SPEED:
+                    a.x(rotations.speed);
+                    break;
+            }
+            switch (Y){
+                case RPM:
+                    a.y(rotations.rpm);
+                    break;
+                case ROTATION:
+                    a.y(rotations.rotationValue);
+                    break;
+                case TIME:
+                    a.y(rotations.deltaTime);
+                    break;
+                case SPEED:
+                    a.y(rotations.speed);
+                    break;
+            }
+            dataVector.add(a);
+        }
+        return dataVector;
     }
 
     public XYChart.Series<String, Double> getRotationSeries() {
@@ -130,8 +213,8 @@ public class ChartIntegration implements Runnable{
         return smoothedSeries;
     }
 
-    public XYChart.Series<String, Double> getFrequecySeries() {
-        return frequecySeries;
+    public MovementDetailsChart getMovementDetailsChart() {
+        return movementDetailsChart;
     }
 
     public void setMainFrameController(MainFrameController mainFrameController) {

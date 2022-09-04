@@ -18,6 +18,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -48,7 +49,7 @@ public class MainFrameController implements Initializable {
     private LineChart<String, Double> rotation_chart;
 
     @FXML
-    private LineChart<String, Double> speed_chart;
+    private LineChart<String, Double> movement_chart;
 
     @FXML
     private LineChart<String, Double> corrention_curve_chart;
@@ -75,32 +76,38 @@ public class MainFrameController implements Initializable {
         chartIntegration.getRotationSeries().setName("Rotacoes");
         chartIntegration.getAverageSeries().setName("Media");
         chartIntegration.getSmoothedSeries().setName("Curva Media");
-        chartIntegration.getFrequecySeries().setName("Amplitude");
+
+        chartIntegration.getMovementDetailsChart().acceleratedSeries.setName("Acelerado");
+        chartIntegration.getMovementDetailsChart().constantSeries.setName("Constante");
+        chartIntegration.getMovementDetailsChart().retardedSeries.setName("Neutro");
 
         rotation_chart.getXAxis().setLabel("Tempo (s)");
         rotation_chart.getYAxis().setLabel("RPS");
 
         average_chart.getXAxis().setLabel("Tempo (s)");
-        average_chart.getYAxis().setLabel("Velocidade (m/s)");
+        average_chart.getYAxis().setLabel("Distancia (cm)");
 
         corrention_curve_chart.getXAxis().setLabel("Tempo (s)");
         corrention_curve_chart.getYAxis().setLabel("Velocidade (m/s)");
 
-        speed_chart.getXAxis().setLabel("Tempo (s)");
-        speed_chart.getYAxis().setLabel("Velocidade (m/s)");
+        movement_chart.getXAxis().setLabel("Tempo (s)");
+        movement_chart.getYAxis().setLabel("Velocidade (m/s)");
 
         rotation_chart.getData().addAll(chartIntegration.getRotationSeries());
         average_chart.getData().addAll(chartIntegration.getAverageSeries());
         corrention_curve_chart.getData().addAll(chartIntegration.getSmoothedSeries());
-        speed_chart.getData().addAll(chartIntegration.getFrequecySeries());
+
+        movement_chart.getData().addAll(chartIntegration.getMovementDetailsChart().acceleratedSeries);
+        movement_chart.getData().addAll(chartIntegration.getMovementDetailsChart().constantSeries);
+        movement_chart.getData().addAll(chartIntegration.getMovementDetailsChart().retardedSeries);
 
         rotation_chart.setCreateSymbols(false);
-        speed_chart.setCreateSymbols(false);
+        //movement_chart.setCreateSymbols(false);
         average_chart.setCreateSymbols(false);
         corrention_curve_chart.setCreateSymbols(false);
 
         rotation_chart.getStyleClass().add("chart");
-        speed_chart.getStyleClass().add("chart");
+        //movement_chart.getStyleClass().add("chart");
         average_chart.getStyleClass().add("chart");
         corrention_curve_chart.getStyleClass().add("chart");
 

@@ -4,63 +4,60 @@ import com.matheusmarkies.manager.RotationManager;
 import com.matheusmarkies.manager.utilities.Vector2D;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SampleAnalysis {
 
-    public static List<RotationManager.Rotations> averageSampleFilter(List<RotationManager.Rotations> rotations, int filterRange) {
-        List<RotationManager.Rotations> filteredRotations = new ArrayList<>();
+    public static List<Vector2D> averageSampleFilter(List<Vector2D> data, int filterRange) {
+        List<Vector2D> filteredRotations = new ArrayList<>();
 
-        filteredRotations.add(new RotationManager.Rotations(
-                rotations.get(0).speed,
-                rotations.get(0).deltaTime,
-                rotations.get(0).rpm)
-        );
+        filteredRotations.add(new Vector2D(
+                data.get(0).x(),
+                data.get(0).y()
+        ));
 
-        for(int i = 0; i < rotations.size();) {
+        for(int i = 0; i < data.size();) {
             int sampleHighIndex = i + filterRange;
 
-            if(sampleHighIndex >= rotations.size()) {
-                sampleHighIndex = (rotations.size() - 1);
+            if(sampleHighIndex >= data.size()) {
+                sampleHighIndex = (data.size() - 1);
 
-                filteredRotations.add(new RotationManager.Rotations(
-                        rotations.get((rotations.size() - 1)).speed,
-                        rotations.get((rotations.size() - 1)).deltaTime,
-                        rotations.get((rotations.size() - 1)).rpm)
-                );
+                filteredRotations.add(new Vector2D(
+                        data.get((data.size() - 1)).x(),
+                        data.get((data.size() - 1)).y()
+                ));
 
                 break;
             }
 
-            double rotationAvarage = 0;
-            double rpmAvarage = 0;
-            double deltaTimeAvarage = 0;
+            double xAverage = 0;
+            double yAverage = 0;
+
             try {
                 for (int u = i; u < (sampleHighIndex); u++) {
-                    rotationAvarage += rotations.get(u).speed / filterRange;
-                    rpmAvarage += rotations.get(u).rpm / filterRange;
-                    deltaTimeAvarage += rotations.get(u).deltaTime / filterRange;
+                    xAverage += data.get(u).x() / filterRange;
+                    yAverage += data.get(u).y() / filterRange;
                 }
             }catch (Exception exception){System.err.println(exception);}
 
             filteredRotations.add(
-                    new RotationManager.Rotations(
-                    (double) Math.round(rotationAvarage*1000)/1000
-                    ,(double) Math.round(deltaTimeAvarage*1000)/1000,
-                    rpmAvarage)
+                    new Vector2D(
+                            (double) Math.round(xAverage*1000)/1000,
+                            (double) Math.round(yAverage*1000)/1000)
             );
 
-            if(sampleHighIndex < rotations.size())
+            if(sampleHighIndex < data.size())
                 i = sampleHighIndex;
             else
                 break;
         }
 
-        return filteredRotations;
+        return getReorderedList(filteredRotations);
     }
 
-    public static List<RotationManager.Rotations> getSmoothChart(List<RotationManager.Rotations> rotations){
-        List<RotationManager.Rotations> smoothedRotations = new ArrayList<>();
+    public static List<Vector2D> getSmoothChart(List<Vector2D> rotations){
+        List<Vector2D> smoothedRotations = new ArrayList<>();
 
         for(int i = 0; i < rotations.size();) {
             int sampleHighIndex = i + 6;
@@ -68,17 +65,13 @@ public class SampleAnalysis {
             if (sampleHighIndex > rotations.size())
                 break;
 
-            Vector2D A = new Vector2D(rotations.get(i).deltaTime,rotations.get(i).speed);
-            Vector2D B = new Vector2D(rotations.get(i+5).deltaTime,rotations.get(i+5).speed);
-            Vector2D C = new Vector2D(rotations.get(i+3).deltaTime,rotations.get(i+3).speed);
+            Vector2D A = new Vector2D(rotations.get(i).x(),rotations.get(i).y());
+            Vector2D B = new Vector2D(rotations.get(i+5).x(),rotations.get(i+5).y());
+            Vector2D C = new Vector2D(rotations.get(i+3).x(),rotations.get(i+3).y());
 
-            for(float k =0;k<1;k+=0.2f){
+            for(float k =0;k<1;k+=0.1f){
                 Vector2D curve = Vector2D.bezierCurve(A,C,B,k);
-                smoothedRotations.add(new RotationManager.Rotations(
-                        (double) Math.round(curve.y()*1000)/1000,
-                        (double) Math.round(curve.x()*1000)/1000
-                        ,0)
-                );
+                smoothedRotations.add(curve);
             }
 
             if(sampleHighIndex < rotations.size())
@@ -86,7 +79,27 @@ public class SampleAnalysis {
             else
                 break;
         }
-        return smoothedRotations;
+        return getReorderedList(smoothedRotations);
+    }
+
+    public static List<Vector2D> getReorderedList(List<Vector2D> list){
+        Vector2D[] vectorArray = new Vector2D[list.size()];
+        list.toArray(vectorArray);
+
+        Vector2D aux = new Vector2D(0,0);
+        int i = 0;
+
+        for(i = 0; i< vectorArray.length; i++){
+            for(int j = 0; j<(vectorArray.length-1); j++){
+                if(vectorArray[j].x() > vectorArray[j + 1].x()){
+                    aux = vectorArray[j];
+                    vectorArray[j] = vectorArray[j+1];
+                    vectorArray[j+1] = aux;
+                }
+            }
+        }
+
+        return Arrays.asList(vectorArray);
     }
 
     public static List<RotationManager.Rotations> getFrequencyCurve(List<RotationManager.Rotations> rotations){

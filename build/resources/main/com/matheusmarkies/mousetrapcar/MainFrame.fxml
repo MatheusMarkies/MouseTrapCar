@@ -25,7 +25,7 @@
             </Menu>
          </menus>
       </MenuBar>
-      <SplitPane dividerPositions="0.1001669449081803" focusTraversable="true" VBox.vgrow="ALWAYS">
+      <SplitPane dividerPositions="0.0" focusTraversable="true" VBox.vgrow="ALWAYS">
          <items>
             <AnchorPane />
             <GridPane>
@@ -52,13 +52,13 @@
                   </AnchorPane>
                   <AnchorPane id="Content" minHeight="-1.0" minWidth="-1.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.valignment="TOP">
                      <children>
-                        <LineChart fx:id="speed_chart" layoutX="14.0" layoutY="338.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <xAxis>
-                              <CategoryAxis side="BOTTOM" />
-                           </xAxis>
-                           <yAxis>
-                              <NumberAxis side="LEFT" />
-                           </yAxis>
+                        <LineChart fx:id="movement_chart" layoutX="48.0" layoutY="19.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <xAxis>
+                            <CategoryAxis side="BOTTOM" />
+                          </xAxis>
+                          <yAxis>
+                            <NumberAxis side="LEFT" />
+                          </yAxis>
                         </LineChart>
                      </children>
                   </AnchorPane>

@@ -24,6 +24,12 @@ public class CarSettingsController implements Initializable {
     private Button save_button;
 
     @FXML
+    private TextField number_axle_tooth;
+
+    @FXML
+    private TextField number_encoder_tooth;
+
+    @FXML
     private TextField wheel_diameter_inputfield;
 
     private MainFrameController mainFrameController;
@@ -33,7 +39,10 @@ public class CarSettingsController implements Initializable {
         try{
             double wheelDiameter = Double.parseDouble(wheel_diameter_inputfield.getText());
 
-            Car car = new Car(wheelDiameter);
+            int encoderTooth = Integer.parseInt(number_encoder_tooth.getText());
+            int axleTooth = Integer.parseInt(number_axle_tooth.getText());
+
+            Car car = new Car(wheelDiameter, encoderTooth, axleTooth);
 
             Save.saveCarSettings(car);
             System.out.println("Salvando...");

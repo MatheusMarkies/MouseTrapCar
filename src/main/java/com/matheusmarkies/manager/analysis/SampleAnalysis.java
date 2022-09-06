@@ -59,6 +59,8 @@ public class SampleAnalysis {
     public static List<Vector2D> getSmoothChart(List<Vector2D> rotations){
         List<Vector2D> smoothedRotations = new ArrayList<>();
 
+        int cte = Math.round(rotations.size() * (3/10));
+
         for(int i = 0; i < rotations.size();) {
             int sampleHighIndex = i + 6;
 
@@ -66,10 +68,10 @@ public class SampleAnalysis {
                 break;
 
             Vector2D A = new Vector2D(rotations.get(i).x(),rotations.get(i).y());
-            Vector2D B = new Vector2D(rotations.get(i+5).x(),rotations.get(i+5).y());
-            Vector2D C = new Vector2D(rotations.get(i+3).x(),rotations.get(i+3).y());
+            Vector2D B = new Vector2D(rotations.get(i+cte).x(),rotations.get(i+cte).y());
+            Vector2D C = new Vector2D(rotations.get(i+Math.round(cte/2)).x(),rotations.get(i+Math.round(cte/2)).y());
 
-            for(float k =0;k<1;k+=0.1f){
+            for(float k =0;k<1;k+=0.01f){
                 Vector2D curve = Vector2D.bezierCurve(A,C,B,k);
                 smoothedRotations.add(curve);
             }

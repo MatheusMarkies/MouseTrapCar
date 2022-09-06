@@ -70,6 +70,9 @@ public class MainFrameController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         rotation_chart.setTitle("Rotation/Time");
+        corrention_curve_chart.setTitle("Velocidade/Time");
+        average_chart.setTitle("Distancia/Time");
+        movement_chart.setTitle("Tipo de Movimento");
 
         chartIntegration =  new ChartIntegration(this);
 
@@ -79,7 +82,7 @@ public class MainFrameController implements Initializable {
 
         chartIntegration.getMovementDetailsChart().acceleratedSeries.setName("Acelerado");
         chartIntegration.getMovementDetailsChart().constantSeries.setName("Constante");
-        chartIntegration.getMovementDetailsChart().retardedSeries.setName("Neutro");
+        chartIntegration.getMovementDetailsChart().retardedSeries.setName("Retardado");
 
         rotation_chart.getXAxis().setLabel("Tempo (s)");
         rotation_chart.getYAxis().setLabel("RPS");
@@ -93,18 +96,28 @@ public class MainFrameController implements Initializable {
         movement_chart.getXAxis().setLabel("Tempo (s)");
         movement_chart.getYAxis().setLabel("Velocidade (m/s)");
 
-        rotation_chart.getData().addAll(chartIntegration.getRotationSeries());
+        rotation_chart.getData().addAll(
+                chartIntegration.getRotationSeries()
+        );
+
         average_chart.getData().addAll(chartIntegration.getAverageSeries());
         corrention_curve_chart.getData().addAll(chartIntegration.getSmoothedSeries());
 
-        movement_chart.getData().addAll(chartIntegration.getMovementDetailsChart().acceleratedSeries);
-        movement_chart.getData().addAll(chartIntegration.getMovementDetailsChart().constantSeries);
-        movement_chart.getData().addAll(chartIntegration.getMovementDetailsChart().retardedSeries);
+        movement_chart.getData().addAll(
+                chartIntegration.getMovementDetailsChart().acceleratedSeries,
+                chartIntegration.getMovementDetailsChart().retardedSeries,
+                chartIntegration.getMovementDetailsChart().constantSeries
+        );
 
         rotation_chart.setCreateSymbols(false);
-        //movement_chart.setCreateSymbols(false);
+        movement_chart.setCreateSymbols(false);
         average_chart.setCreateSymbols(false);
         corrention_curve_chart.setCreateSymbols(false);
+
+        rotation_chart.setAnimated(false);
+        movement_chart.setAnimated(false);
+        average_chart.setAnimated(false);
+        corrention_curve_chart.setAnimated(false);
 
         rotation_chart.getStyleClass().add("chart");
         //movement_chart.getStyleClass().add("chart");
@@ -174,31 +187,50 @@ public class MainFrameController implements Initializable {
 
     private boolean chartRefresh;
     private int rotationHistoryIndex = 0;
-    public void chartRefresh(boolean b){
-        if (rotationManager.getRotationsHistory().size() > 0)
-            if (rotationHistoryIndex != rotationManager.getRotationsHistory().size()) {
-                chartIntegration.setAnalysisToChart(0);
-                rotationHistoryIndex = rotationManager.getRotationsHistory().size();
-            }
 
-        if(!chartRefresh && b){
-        //Start Reciver Samples
-            System.out.println("Start Reciver Samples");
-            if(!seriesAdded) {
-                chartIntegration.reset();
-                seriesAdded = false;
-            }
-        }
-        if(chartRefresh && !b) {
-            //Stop Reciver Sample
-            System.out.println("Stop Reciver Samples");
-            if (rotationManager.getRotationsHistory().size() > 0)
+    int seriesAddedCount = 0;
+
+    int oldAdded = 0;
+
+    public void chartRefresh(boolean b){
+
+/*            if (rotationManager.getRotationsHistory().size() > 0)
                 if (rotationHistoryIndex != rotationManager.getRotationsHistory().size()) {
-                    //chartIntegration.setAnalysisToChart(0);
+                    if(seriesAddedCount > 10) {
+                        chartIntegration.setAnalysisToChart(0);
+                        seriesAddedCount=0;
+                    }
                     rotationHistoryIndex = rotationManager.getRotationsHistory().size();
                 }
-        }
-        chartRefresh = b;
+
+            if (!chartRefresh && b) {
+                //Start Reciver Samples
+                System.out.println("Start Reciver Samples");
+                if (!seriesAdded) {
+                    if(seriesAddedCount == 0)
+                    chartIntegration.reset();
+                    seriesAdded = false;
+                }
+            }
+            if (chartRefresh && !b) {
+                //Stop Reciver Sample
+                System.out.println("Stop Reciver Samples");
+                if (rotationManager.getRotationsHistory().size() > 0)
+                    if (rotationHistoryIndex != rotationManager.getRotationsHistory().size()) {
+                        //chartIntegration.setAnalysisToChart(0);
+                        rotationHistoryIndex = rotationManager.getRotationsHistory().size();
+                    }
+            }
+            chartRefresh = b;*/
+
+            if (rotationHistoryIndex != rotationManager.getRotationsHistory().size()) {
+                if (seriesAddedCount > 10) {
+                    chartIntegration.setAnalysisToChart(0);
+                    seriesAddedCount = 0;
+                }
+                seriesAddedCount++;
+            }else
+                rotationHistoryIndex = rotationManager.getRotationsHistory().size();
     }
 
     public void setMouseTrapCarManager(RotationManager rotationManager) {

@@ -16,9 +16,9 @@ public class ChartIntegration implements Runnable{
     private XYChart.Series<String, Double> smoothedSeries = new XYChart.Series<String, Double>();
 
     public class MovementDetailsChart {
-        public XYChart.Series<String, Double> acceleratedSeries = new XYChart.Series<String, Double>();
-        public XYChart.Series<String, Double> constantSeries = new XYChart.Series<String, Double>();
-        public XYChart.Series<String, Double> retardedSeries = new XYChart.Series<String, Double>();
+        public XYChart.Series acceleratedSeries = new XYChart.Series();
+        public XYChart.Series constantSeries = new XYChart.Series();
+        public XYChart.Series retardedSeries = new XYChart.Series();
     }
 
     private MovementDetailsChart movementDetailsChart = new MovementDetailsChart();
@@ -91,13 +91,13 @@ public class ChartIntegration implements Runnable{
 
         try {
             List<Vector2D> averageRotations = SampleAnalysis.averageSampleFilter(
-                    dataVector, 4
+                    dataVector, 1
             );
 
             for (Vector2D rotations : averageRotations) {
                 XYChart.Data data = new XYChart.Data<Double, Integer>();
                 distance += rotations.y()
-                        * (mainFrameController.getCar().getWheelDiameter() * 2 * Math.PI) * 0.75;
+                        * (mainFrameController.getCar().getWheelDiameter() * Math.PI) * 0.75;
                 data = new XYChart.Data<String, Double>((double)Math.round(distance*1000)/1000 + "",
                         (double)Math.round(rotations.x()*1000)/1000);
                 dataList.add(data);
@@ -128,8 +128,8 @@ public class ChartIntegration implements Runnable{
         return dataList;
     }
 
-    public List<List<XYChart.Data<String, Double>>> addMovementDetailsCurve() {
-        List<List<XYChart.Data<String, Double>>> dataList = new ArrayList<>();
+    public List<List<XYChart.Data>> addMovementDetailsCurve() {
+        List<List<XYChart.Data>> dataList = new ArrayList<>();
         dataList.add(new ArrayList<>());
         dataList.add(new ArrayList<>());
         dataList.add(new ArrayList<>());
@@ -141,8 +141,12 @@ public class ChartIntegration implements Runnable{
 
             for (int i =0;i<dataVector.size();i++) {
                 XYChart.Data data = new XYChart.Data<String, Integer>();
+                XYChart.Data secData = new XYChart.Data<String, Integer>();
                 data = new XYChart.Data<String, Double>(""+(double)Math.round(averageSamples.get(i).x()*1000)/1000,
                         (double)Math.round(averageSamples.get(i).y()*1000)/1000);
+
+                secData = new XYChart.Data<String, Double>(""+(double)Math.round(averageSamples.get(i).x()*1000)/1000,
+                        0.0);
 
                 int index = 0;
 
@@ -157,7 +161,24 @@ public class ChartIntegration implements Runnable{
                         .movementType == RotationManager.Rotations.MovementType.RETARDED)
                     index = 2;
 
-                dataList.get(index).add(data);
+                switch (index){
+                    case 0:
+                        dataList.get(0).add(data);
+                        dataList.get(1).add(secData);
+                        dataList.get(2).add(secData);
+                        break;
+                    case 1:
+                        dataList.get(0).add(secData);
+                        dataList.get(1).add(data);
+                        dataList.get(2).add(secData);
+                        break;
+                    case 2:
+                        dataList.get(0).add(secData);
+                        dataList.get(1).add(secData);
+                        dataList.get(2).add(data);
+                        break;
+                }
+
             }
         }catch (Exception exception){System.err.println("addFrequencyCurve "+exception);}
 

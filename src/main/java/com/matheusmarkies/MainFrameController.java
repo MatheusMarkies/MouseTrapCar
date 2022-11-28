@@ -72,7 +72,7 @@ public class MainFrameController implements Initializable {
         movement_chart.setTitle("Tipo de Movimento");
 
         chartIntegration =  new ChartIntegration(this);
-
+//
         chartIntegration.getRotationSeries().setName("Rotacoes");
         chartIntegration.getAverageSeries().setName("Media");
         chartIntegration.getSmoothedSeries().setName("Curva Media");

@@ -15,7 +15,7 @@ public class ChartIntegration implements Runnable{
     private XYChart.Series<String, Double> averageSeries = new XYChart.Series<String, Double>();
     private XYChart.Series<String, Double> smoothedSeries = new XYChart.Series<String, Double>();
 
-    public class MovementDetailsChart {
+    public static class MovementDetailsChart {
         public XYChart.Series acceleratedSeries = new XYChart.Series();
         public XYChart.Series constantSeries = new XYChart.Series();
         public XYChart.Series retardedSeries = new XYChart.Series();
@@ -90,16 +90,19 @@ public class ChartIntegration implements Runnable{
         double distance = 0;
 
         try {
-            List<Vector2D> averageRotations = SampleAnalysis.averageSampleFilter(
-                    dataVector, 1
-            );
+            //List<Vector2D> averageRotations = SampleAnalysis.averageSampleFilter(
+                    //dataVector, 1
+            //);
 
-            for (Vector2D rotations : averageRotations) {
+            for (Vector2D rotations : dataVector) {
                 XYChart.Data data = new XYChart.Data<Double, Integer>();
-                distance += rotations.y()
-                        * (mainFrameController.getCar().getWheelDiameter() * Math.PI) * 0.75;
-                data = new XYChart.Data<String, Double>((double)Math.round(distance*1000)/1000 + "",
-                        (double)Math.round(rotations.x()*1000)/1000);
+
+                distance +=  rotations.y() * (double)
+                        (Math.round(mainFrameController.getCar().getWheelDiameter()
+                                * Math.PI * 1000)/1000) * 0.75;
+                System.out.println(distance);
+                data = new XYChart.Data<String, Double>((double)Math.round(rotations.x()*1000)/1000 + "",
+                        (double)Math.round(distance*1000)/1000);//(double)Math.round(rotations.x()*1000)/1000);
                 dataList.add(data);
             }
         }catch (Exception exception){System.err.println("addEntityToAverageChart "+exception);}
@@ -119,8 +122,8 @@ public class ChartIntegration implements Runnable{
 
             for (Vector2D rotations : smoothedRotations) {
                 XYChart.Data data = new XYChart.Data<Double, Integer>();
-                data = new XYChart.Data<String, Double>((double)Math.round(rotations.y()*1000)/1000  + "",
-                        (double)Math.round(rotations.x()*1000)/1000);
+                data = new XYChart.Data<String, Double>((double)Math.round(rotations.x()*1000)/1000  + "",
+                        (double)Math.round(rotations.y()*1000)/1000);
                 dataList.add(data);
             }
         }catch (Exception exception){System.err.println("addEntityToSmoothedChart "+exception);}

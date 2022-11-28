@@ -64,8 +64,12 @@ public class SampleAnalysis {
         for(int i = 0; i < rotations.size();) {
             int sampleHighIndex = i + 6;
 
-            if (sampleHighIndex > rotations.size())
+            if (sampleHighIndex >= rotations.size()) {
+                Vector2D A = new Vector2D(rotations.get(rotations.size()-1).x()
+                        ,rotations.get(rotations.size()-1).y());
+                smoothedRotations.add(A);
                 break;
+            }
 
             Vector2D A = new Vector2D(rotations.get(i).x(),rotations.get(i).y());
             Vector2D B = new Vector2D(rotations.get(i+cte).x(),rotations.get(i+cte).y());
@@ -81,6 +85,8 @@ public class SampleAnalysis {
             else
                 break;
         }
+        //Vector2D A = new Vector2D(rotations.get(rotations.size()).x(),rotations.get(rotations.size()).y());
+        //smoothedRotations.add(A);
         return getReorderedList(smoothedRotations);
     }
 

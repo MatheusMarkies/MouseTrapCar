@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.chart.AreaChart?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
@@ -52,14 +53,14 @@
                   </AnchorPane>
                   <AnchorPane id="Content" minHeight="-1.0" minWidth="-1.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.valignment="TOP">
                      <children>
-                        <LineChart fx:id="movement_chart" layoutX="48.0" layoutY="19.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <AreaChart fx:id="movement_chart" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <xAxis>
                             <CategoryAxis side="BOTTOM" />
                           </xAxis>
                           <yAxis>
                             <NumberAxis side="LEFT" />
                           </yAxis>
-                        </LineChart>
+                        </AreaChart>
                      </children>
                   </AnchorPane>
                   <AnchorPane id="Content" minHeight="-1.0" minWidth="-1.0" GridPane.halignment="LEFT" GridPane.rowIndex="1" GridPane.valignment="BOTTOM">

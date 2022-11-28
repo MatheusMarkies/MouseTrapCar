@@ -16,10 +16,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ScatterChart;
-import javafx.scene.chart.XYChart;
+import javafx.scene.chart.*;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
@@ -49,7 +46,7 @@ public class MainFrameController implements Initializable {
     private LineChart<String, Double> rotation_chart;
 
     @FXML
-    private LineChart<String, Double> movement_chart;
+    private AreaChart<String, Double> movement_chart;
 
     @FXML
     private LineChart<String, Double> corrention_curve_chart;
@@ -69,9 +66,9 @@ public class MainFrameController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        rotation_chart.setTitle("Rotation/Time");
-        corrention_curve_chart.setTitle("Velocidade/Time");
-        average_chart.setTitle("Distancia/Time");
+        rotation_chart.setTitle("Rotacao/Tempo");
+        corrention_curve_chart.setTitle("Velocidade/Tempo");
+        average_chart.setTitle("Distancia/Tempo");
         movement_chart.setTitle("Tipo de Movimento");
 
         chartIntegration =  new ChartIntegration(this);

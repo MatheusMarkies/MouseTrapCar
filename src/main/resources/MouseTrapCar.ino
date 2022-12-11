@@ -5,7 +5,7 @@ int t_interrup = 30000 ;// Tempo de 1 microsegundo
 int decoderRead = 0;
 float revolutionCont = 0; //Variação do contador
 
-int resolution = 1024;
+int resolution = 500;
 
 SoftwareSerial XBee(0,1);
 

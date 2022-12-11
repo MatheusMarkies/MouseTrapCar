@@ -46,7 +46,7 @@ public class SerialRunnable implements SerialPortPacketListener, Runnable {
     ReadType readType = null;
     boolean getReadType = true;
     private final byte[] buffer = new byte[2048];
-
+    float rot=0;
     @Override
     public void serialEvent(SerialPortEvent event) {
         if (event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE)
@@ -78,7 +78,8 @@ public class SerialRunnable implements SerialPortPacketListener, Runnable {
                         if (readType != null)
                             switch (readType) {
                                 case RPM:
-                                    double RPM = Double.parseDouble(inputString);
+                                    double CPR = Double.parseDouble(inputString);
+                                    double RPM = CPR/2000;
                                     RotationManager.Rotations rotation = rotationManager.addEntityRotationsList(Math.abs(RPM));
 
                                     if (rotation != null)
@@ -88,8 +89,8 @@ public class SerialRunnable implements SerialPortPacketListener, Runnable {
                                             if (data != null)
                                                 //rotationManager.getMainFrameController().getRotationSeries().getData().add(data);
                                                 rotationManager.getMainFrameController().chartRefresh(true);
-
-                                            System.out.println(rotation.toString());
+                                            rot += CPR;
+                                            System.out.println("R: "+rot);
                                         } else
                                             rotationManager.getMainFrameController().chartRefresh(false);
 

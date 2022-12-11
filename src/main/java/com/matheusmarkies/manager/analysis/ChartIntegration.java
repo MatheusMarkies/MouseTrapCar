@@ -100,7 +100,7 @@ public class ChartIntegration implements Runnable{
                 distance +=  rotations.y() * (double)
                         (Math.round(mainFrameController.getCar().getWheelDiameter()
                                 * Math.PI * 1000)/1000) * 0.75;
-                System.out.println(distance);
+                //System.out.println(distance);
                 data = new XYChart.Data<String, Double>((double)Math.round(rotations.x()*1000)/1000 + "",
                         (double)Math.round(distance*1000)/1000);//(double)Math.round(rotations.x()*1000)/1000);
                 dataList.add(data);

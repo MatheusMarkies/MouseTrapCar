@@ -25,7 +25,7 @@ public class ChartIntegration implements Runnable{
 
     private MainFrameController mainFrameController;
 
-    enum ColumnType{ROTATION,SPEED,TIME,RPM}
+    enum ColumnType{ROTATION,SPEED,TIME, DISTANCE, RPM}
 
     public ChartIntegration(){ }
 
@@ -43,7 +43,7 @@ public class ChartIntegration implements Runnable{
     public void setAnalysisToChart(int sampleIndex) {
         reset();
 
-        rotationSeries.getData().addAll(addEntityToAverageChart(ColumnType.TIME,ColumnType.ROTATION));
+        rotationSeries.getData().addAll(addEntityToAverageChart(ColumnType.TIME,ColumnType.RPM));
         rotationSeries.setName("Rotacao");
         averageSeries.getData().addAll(addEntityToDistanceAverageChart());
         averageSeries.setName("Distancia");
@@ -69,16 +69,16 @@ public class ChartIntegration implements Runnable{
         List<Vector2D> dataVector = getDataVector(X,Y);
 
         try {
-            List<Vector2D> averageRotations = SampleAnalysis.averageSampleFilter(
-                    dataVector, 4
+            List<Vector2D> averageRotations = SampleAnalysis.movingAverageFilter(
+                    dataVector, 6
             );
 
             for (Vector2D rotations : averageRotations) {
                 XYChart.Data data = new XYChart.Data<Double, Integer>();
-                data = new XYChart.Data<String, Double>((double) rotations.x() + "", rotations.y());
+                data = new XYChart.Data<String, Double>((double)Math.round(rotations.x()*1000)/1000 + "", (double)Math.round(rotations.y()*1000)/1000);
                 dataList.add(data);
             }
-        }catch (Exception exception){System.err.println("addEntityToAverageChart "+exception);}
+        }catch (Exception exception){/*System.err.println("addEntityToAverageChart "+exception);*/}
 
         return dataList;
     }
@@ -86,26 +86,24 @@ public class ChartIntegration implements Runnable{
     public Collection<XYChart.Data<String, Double>> addEntityToDistanceAverageChart() {
         List<XYChart.Data<String, Double>> dataList = new ArrayList<>();
 
-        List<Vector2D> dataVector = getDataVector(ColumnType.TIME,ColumnType.ROTATION);
+        List<Vector2D> dataVector = getDataVector(ColumnType.TIME,ColumnType.DISTANCE);
         double distance = 0;
 
         try {
-            //List<Vector2D> averageRotations = SampleAnalysis.averageSampleFilter(
-                    //dataVector, 1
-            //);
+            List<Vector2D> averageRotations = SampleAnalysis.movingAverageFilter(
+                    dataVector, 6
+            );
 
             for (Vector2D rotations : dataVector) {
                 XYChart.Data data = new XYChart.Data<Double, Integer>();
 
-                distance +=  rotations.y() * (double)
-                        (Math.round(mainFrameController.getCar().getWheelDiameter()
-                                * Math.PI * 1000)/1000) * 0.75;
+                distance += rotations.y()/100;
                 //System.out.println(distance);
                 data = new XYChart.Data<String, Double>((double)Math.round(rotations.x()*1000)/1000 + "",
-                        (double)Math.round(distance*1000)/1000);//(double)Math.round(rotations.x()*1000)/1000);
+                        (double)Math.round(distance*1000)/1000);
                 dataList.add(data);
             }
-        }catch (Exception exception){System.err.println("addEntityToAverageChart "+exception);}
+        }catch (Exception exception){/*System.err.println("addEntityToAverageChart "+exception);*/}
 
         return dataList;
     }
@@ -126,7 +124,7 @@ public class ChartIntegration implements Runnable{
                         (double)Math.round(rotations.y()*1000)/1000);
                 dataList.add(data);
             }
-        }catch (Exception exception){System.err.println("addEntityToSmoothedChart "+exception);}
+        }catch (Exception exception){/*System.err.println("addEntityToSmoothedChart "+exception);*/}
 
         return dataList;
     }
@@ -183,7 +181,7 @@ public class ChartIntegration implements Runnable{
                 }
 
             }
-        }catch (Exception exception){System.err.println("addFrequencyCurve "+exception);}
+        }catch (Exception exception){/*System.err.println("addFrequencyCurve "+exception);*/}
 
         return dataList;
     }
@@ -200,10 +198,13 @@ public class ChartIntegration implements Runnable{
                     a.x(rotations.rotationValue);
                     break;
                 case TIME:
-                    a.x(rotations.deltaTime);
+                    a.x(rotations.elapsedTime);
                     break;
                 case SPEED:
                     a.x(rotations.speed);
+                    break;
+                case DISTANCE:
+                    a.x(rotations.elapsedDistance);
                     break;
             }
             switch (Y){
@@ -214,10 +215,13 @@ public class ChartIntegration implements Runnable{
                     a.y(rotations.rotationValue);
                     break;
                 case TIME:
-                    a.y(rotations.deltaTime);
+                    a.y(rotations.elapsedTime);
                     break;
                 case SPEED:
                     a.y(rotations.speed);
+                    break;
+                case DISTANCE:
+                    a.y(rotations.elapsedDistance);
                     break;
             }
             dataVector.add(a);

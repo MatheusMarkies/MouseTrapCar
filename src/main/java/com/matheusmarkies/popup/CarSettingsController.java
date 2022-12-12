@@ -42,7 +42,7 @@ public class CarSettingsController implements Initializable {
             int encoderTooth = Integer.parseInt(number_encoder_tooth.getText());
             int axleTooth = Integer.parseInt(number_axle_tooth.getText());
 
-            Car car = new Car(wheelDiameter, encoderTooth, axleTooth);
+            Car car = new Car(wheelDiameter, encoderTooth, axleTooth, 500);
 
             Save.saveCarSettings(car);
             System.out.println("Salvando...");
@@ -55,6 +55,8 @@ public class CarSettingsController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         try {
            wheel_diameter_inputfield.setText(Save.openCarPresets().getWheelDiameter() + "");
+            number_axle_tooth.setText(Save.openCarPresets().getAxleTooth() + "");
+            number_encoder_tooth.setText(Save.openCarPresets().getEncoderTooth() + "");
         }catch (Exception exception){System.err.println(exception);}
     }
 

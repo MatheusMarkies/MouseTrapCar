@@ -25,6 +25,9 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class MainFrameController implements Initializable {
 
@@ -82,10 +85,10 @@ public class MainFrameController implements Initializable {
         chartIntegration.getMovementDetailsChart().retardedSeries.setName("Retardado");
 
         rotation_chart.getXAxis().setLabel("Tempo (s)");
-        rotation_chart.getYAxis().setLabel("RPS");
+        rotation_chart.getYAxis().setLabel("RPM");
 
         average_chart.getXAxis().setLabel("Tempo (s)");
-        average_chart.getYAxis().setLabel("Distancia (cm)");
+        average_chart.getYAxis().setLabel("Distancia (m)");
 
         corrention_curve_chart.getXAxis().setLabel("Tempo (s)");
         corrention_curve_chart.getYAxis().setLabel("Velocidade (m/s)");
@@ -120,6 +123,15 @@ public class MainFrameController implements Initializable {
         //movement_chart.getStyleClass().add("chart");
         average_chart.getStyleClass().add("chart");
         corrention_curve_chart.getStyleClass().add("chart");
+
+        ScheduledExecutorService scheduledExecutorService;
+        scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            Platform.runLater(() -> {
+                chartIntegration.setAnalysisToChart(0);
+            });
+        }, 0, 200, TimeUnit.MILLISECONDS);
 
         connect_menu_button.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
@@ -161,6 +173,11 @@ public class MainFrameController implements Initializable {
         }
     }
 
+    @FXML
+    void onClickInReset(ActionEvent event) {
+        getMouseTrapCarManager().getRotationsHistory().clear();
+    }
+
     void openCarSettingsPopUp() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(
@@ -190,39 +207,9 @@ public class MainFrameController implements Initializable {
     int oldAdded = 0;
 
     public void chartRefresh(boolean b){
-
-/*            if (rotationManager.getRotationsHistory().size() > 0)
-                if (rotationHistoryIndex != rotationManager.getRotationsHistory().size()) {
-                    if(seriesAddedCount > 10) {
-                        chartIntegration.setAnalysisToChart(0);
-                        seriesAddedCount=0;
-                    }
-                    rotationHistoryIndex = rotationManager.getRotationsHistory().size();
-                }
-
-            if (!chartRefresh && b) {
-                //Start Reciver Samples
-                System.out.println("Start Reciver Samples");
-                if (!seriesAdded) {
-                    if(seriesAddedCount == 0)
-                    chartIntegration.reset();
-                    seriesAdded = false;
-                }
-            }
-            if (chartRefresh && !b) {
-                //Stop Reciver Sample
-                System.out.println("Stop Reciver Samples");
-                if (rotationManager.getRotationsHistory().size() > 0)
-                    if (rotationHistoryIndex != rotationManager.getRotationsHistory().size()) {
-                        //chartIntegration.setAnalysisToChart(0);
-                        rotationHistoryIndex = rotationManager.getRotationsHistory().size();
-                    }
-            }
-            chartRefresh = b;*/
-
             if (rotationHistoryIndex != rotationManager.getRotationsHistory().size()) {
                 if (seriesAddedCount > 10) {
-                    chartIntegration.setAnalysisToChart(0);
+                    //chartIntegration.setAnalysisToChart(0);
                     seriesAddedCount = 0;
                 }
                 seriesAddedCount++;

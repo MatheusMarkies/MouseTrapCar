@@ -1,7 +1,7 @@
 #include "SoftwareSerial.h"
 #include <TimerOne.h>
 
-int t_interrup = 30000 ;// Tempo de 1 microsegundo
+int t_interrup = 3000;// Tempo de 1 microsegundo
 int decoderRead = 0;
 float revolutionCont = 0; //Variação do contador
 

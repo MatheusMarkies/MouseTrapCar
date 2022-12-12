@@ -40,7 +40,7 @@ public class SerialRunnable implements SerialPortPacketListener, Runnable {
     }
 
     enum ReadType{
-        RPM
+        DISTANCE, RPM
     }
 
     ReadType readType = null;
@@ -70,6 +70,10 @@ public class SerialRunnable implements SerialPortPacketListener, Runnable {
                         readType = ReadType.RPM;
                         getReadType = false;
                         break;
+                    case "D:":
+                        readType = ReadType.DISTANCE;
+                        getReadType = false;
+                        break;
 
                     default:
                         if (getReadType) {
@@ -79,21 +83,24 @@ public class SerialRunnable implements SerialPortPacketListener, Runnable {
                             switch (readType) {
                                 case RPM:
                                     double CPR = Double.parseDouble(inputString);
-                                    double RPM = CPR/2000;
-                                    RotationManager.Rotations rotation = rotationManager.addEntityRotationsList(Math.abs(RPM));
+                                    double RPM = CPR;
+                                    RotationManager.Rotations rotation = rotationManager.addEntityRotationsList(Math.abs(CPR));
 
                                     if (rotation != null)
                                         if (RPM != 0.0 && Double.isFinite(rotation.rpm)) {
                                             rotationManager.getRotationsHistory().add(rotation);
-                                            XYChart.Data data = rotationManager.addEntityToRotationsChart(rotation);
-                                            if (data != null)
-                                                //rotationManager.getMainFrameController().getRotationSeries().getData().add(data);
-                                                rotationManager.getMainFrameController().chartRefresh(true);
-                                            rot += CPR;
-                                            System.out.println("R: "+rot);
-                                        } else
-                                            rotationManager.getMainFrameController().chartRefresh(false);
+                                            //System.out.println(rotation.toString());
+                                            //XYChart.Data data = rotationManager.addEntityToRotationsChart(rotation);
+                                            // if (data != null)
+                                            //rotationManager.getMainFrameController().getRotationSeries().getData().add(data);
+                                            //rotationManager.getMainFrameController().chartRefresh(true);
+                                        } //else
+                                    //rotationManager.getMainFrameController().chartRefresh(false);
 
+                                    getReadType = true;
+                                    break;
+                                case DISTANCE:
+                                    System.out.println(Double.parseDouble(inputString));
                                     getReadType = true;
                                     break;
                             }

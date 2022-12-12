@@ -9,6 +9,27 @@ import java.util.List;
 
 public class SampleAnalysis {
 
+    public static  List<Vector2D> movingAverageFilter(List<Vector2D> data, int samples) {
+        List<Vector2D> filteredStats = data;
+
+        if (data.size() > samples) {
+            filteredStats = new ArrayList<>();
+            int filterLength = Math.round(data.size()/samples);
+            for(int i =0;i<filterLength;i++){
+                double valueY = 0;
+                for(int u = (i * samples);u<((i+1)*samples);u++) {
+                    valueY+=data.get(u).y()/samples;
+                }
+                double valueX = 0;
+                for(int u = (i * samples);u<((i+1)*samples);u++) {
+                    valueX+=data.get(u).x()/samples;
+                }
+                filteredStats.add(new Vector2D(valueX,valueY));
+            }
+        }
+        return filteredStats;
+    }
+
     public static List<Vector2D> averageSampleFilter(List<Vector2D> data, int filterRange) {
         List<Vector2D> filteredRotations = new ArrayList<>();
 

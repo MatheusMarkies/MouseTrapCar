@@ -20,6 +20,8 @@ public class RotationManager {
         public double deltaTime = 0;
 
         public double rpm;
+        public double elapsedTime;
+        public double elapsedDistance;
 
         public enum MovementType{
             ACCELERATED, RETARDED, CONSTANT
@@ -55,8 +57,12 @@ public class RotationManager {
 
     public Rotations addEntityRotationsList(double entity){
         try {
+            double deltaTime = 0.01f;
             Rotations rpm = new Rotations();
-            rpm.rotationValue = entity;
+            rpm.rotationValue = (entity / mainFrameController.getCar().getEncoderCPR())
+                    * mainFrameController.getCar().getAxleTransmissionRatio();
+
+            rpm.elapsedTime = 0;
 
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
             LocalTime localTimeNow = LocalTime.now();
@@ -68,16 +74,25 @@ public class RotationManager {
             rpm.addedTime = (Date.from(instant));
 
             double deltaTimeComparedToPrevious = 0;
-            double deltaTime = 0;
             double changeRate = 0;
 
-            rpm.speed = (entity/0.1) * Math.PI *(mainFrameController.getCar().getWheelDiameter()/100);
+            if (rotationsHistory.size() > 0) {
+                deltaTime = (double)(rpm.addedTime.getTime() - rotationsHistory.get(rotationsHistory.size()-1).addedTime.getTime())/1000;
+                deltaTime = (double) Math.round(deltaTime * 10000)/10000;
+
+                rpm.elapsedTime =(rpm.addedTime.getTime() -  rotationsHistory.get(0).addedTime.getTime())/1000;
+            }
+
+            rpm.deltaTime = deltaTime;
+            rpm.rpm = (rpm.rotationValue/deltaTime) * 60;
+
+            float arc = (float)(rpm.rotationValue * 360);
+            rpm.elapsedDistance = Math.toRadians(arc) * (mainFrameController.getCar().getWheelDiameter()/2);
+
+            rpm.speed = (rpm.rpm * ((2*Math.PI/60) *(mainFrameController.getCar().getWheelDiameter()/200)));
             rpm.speed = (double) Math.round(rpm.speed * 100)/100;
 
             if (rotationsHistory.size() > 0) {
-                deltaTime = (double)(rpm.addedTime.getTime() - rotationsHistory.get(0).addedTime.getTime())/1000;
-                deltaTime = (double) Math.round(deltaTime * 100)/100;
-
                 changeRate = (double)(rpm.speed - rotationsHistory.get(rotationsHistory.size()-1).speed) /
                         ((double)(rpm.addedTime.getTime() - rotationsHistory.get(rotationsHistory.size()-1).addedTime.getTime())/1000);
             }
@@ -91,9 +106,6 @@ public class RotationManager {
 
             rpm.changeRate = changeRate;
             rpm.changeRate = (double) Math.round(rpm.changeRate * 100)/100;
-
-            rpm.deltaTime = deltaTime;
-            rpm.rpm = (entity/0.1) * 60;
 
             return rpm;
         }catch (Exception e){ System.err.println("addEntityRotationsList "+e); }

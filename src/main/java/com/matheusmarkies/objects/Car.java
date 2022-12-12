@@ -7,6 +7,7 @@ public class Car implements Serializable {
     double wheelDiameter = 12;//(cm)
     int encoderTooth = 30;
     int axleTooth = 40;
+    int encoderCPR = 500;
 
     public Car(){}
 
@@ -14,10 +15,11 @@ public class Car implements Serializable {
         this.wheelDiameter = wheelDiameter;
     }
 
-    public Car(double wheelDiameter, int encoderTooth, int axleTooth) {
+    public Car(double wheelDiameter, int encoderTooth, int axleTooth, int encoderCPR) {
         this.wheelDiameter = wheelDiameter;
         this.encoderTooth = encoderTooth;
         this.axleTooth = axleTooth;
+        this.encoderCPR = encoderCPR;
     }
 
     public int getEncoderTooth() {
@@ -45,10 +47,17 @@ public class Car implements Serializable {
     }
 
     public double getAxleTransmissionRatio(){
-        return (encoderTooth/axleTooth);
+        return 0.75;//(encoderTooth/axleTooth);
     }
     public double getEncoderTransmissionRatio(){
         return (1/getAxleTransmissionRatio());
     }
 
+    public int getEncoderCPR() {
+        return 500;//encoderCPR;
+    }
+
+    public void setEncoderCPR(int encoderCPR) {
+        this.encoderCPR = encoderCPR;
+    }
 }

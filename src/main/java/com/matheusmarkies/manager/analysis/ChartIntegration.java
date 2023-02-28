@@ -70,7 +70,7 @@ public class ChartIntegration implements Runnable{
 
         try {
             List<Vector2D> averageRotations = SampleAnalysis.movingAverageFilter(
-                    dataVector, 6
+                    dataVector, 4
             );
 
             for (Vector2D rotations : averageRotations) {
@@ -91,7 +91,7 @@ public class ChartIntegration implements Runnable{
 
         try {
             List<Vector2D> averageRotations = SampleAnalysis.movingAverageFilter(
-                    dataVector, 6
+                    dataVector, 4
             );
 
             for (Vector2D rotations : dataVector) {
@@ -137,7 +137,7 @@ public class ChartIntegration implements Runnable{
         try {
             List<Vector2D> dataVector = getDataVector(ColumnType.TIME,ColumnType.SPEED);
             List<Vector2D>  averageSamples = SampleAnalysis.averageSampleFilter(
-                    dataVector, 1
+                    dataVector, 2
             );
 
             for (int i =0;i<dataVector.size();i++) {

@@ -4,6 +4,8 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortEvent;
 import com.fazecast.jSerialComm.SerialPortPacketListener;
 import com.matheusmarkies.manager.RotationManager;
+import com.matheusmarkies.manager.utilities.KalmanFilter;
+import com.matheusmarkies.objects.Rotations;
 import javafx.scene.chart.XYChart;
 
 import java.nio.ByteBuffer;
@@ -47,6 +49,7 @@ public class SerialRunnable implements SerialPortPacketListener, Runnable {
     boolean getReadType = true;
     private final byte[] buffer = new byte[2048];
     float rot=0;
+
     @Override
     public void serialEvent(SerialPortEvent event) {
         if (event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE)
@@ -84,10 +87,11 @@ public class SerialRunnable implements SerialPortPacketListener, Runnable {
                                 case RPM:
                                     double CPR = Double.parseDouble(inputString);
                                     double RPM = CPR;
-                                    RotationManager.Rotations rotation = rotationManager.addEntityRotationsList(Math.abs(CPR));
+                                    Rotations rotation = rotationManager.addEntityRotationsList(Math.abs(CPR));
 
                                     if (rotation != null)
                                         if (RPM != 0.0 && Double.isFinite(rotation.rpm)) {
+
                                             rotationManager.getRotationsHistory().add(rotation);
                                             //System.out.println(rotation.toString());
                                             //XYChart.Data data = rotationManager.addEntityToRotationsChart(rotation);

@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.matheusmarkies.MainFrameController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.matheusmarkies.MainFrameController">
    <children>
       <MenuBar fx:id="menu_bar">
          <menus>
@@ -27,11 +27,12 @@
             </Menu>
          </menus>
       </MenuBar>
-      <SplitPane dividerPositions="0.05843071786310518" focusTraversable="true" VBox.vgrow="ALWAYS">
+      <SplitPane dividerPositions="0.10851419031719532" focusTraversable="true" VBox.vgrow="ALWAYS">
          <items>
             <AnchorPane>
                <children>
                   <Button layoutX="8.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickInReset" prefHeight="25.0" prefWidth="51.0" text="Reset" AnchorPane.leftAnchor="4.0" AnchorPane.rightAnchor="4.0" />
+                  <Button fx:id="saveButton" layoutX="38.0" layoutY="49.0" mnemonicParsing="false" onAction="#onClickInSave" prefHeight="25.0" prefWidth="51.0" text="Save" />
                </children></AnchorPane>
             <GridPane>
               <columnConstraints>

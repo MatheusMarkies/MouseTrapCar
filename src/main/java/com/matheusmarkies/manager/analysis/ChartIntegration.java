@@ -3,6 +3,7 @@ package com.matheusmarkies.manager.analysis;
 import com.matheusmarkies.MainFrameController;
 import com.matheusmarkies.manager.RotationManager;
 import com.matheusmarkies.manager.utilities.Vector2D;
+import com.matheusmarkies.objects.Rotations;
 import javafx.scene.chart.XYChart;
 
 import java.util.ArrayList;
@@ -154,12 +155,12 @@ public class ChartIntegration implements Runnable{
                 if(mainFrameController
                         .getMouseTrapCarManager()
                         .getRotationsHistory().get(i)
-                        .movementType == RotationManager.Rotations.MovementType.CONSTANT)
+                        .movementType == Rotations.MovementType.CONSTANT)
                     index = 1;
                 else if(mainFrameController
                         .getMouseTrapCarManager()
                         .getRotationsHistory().get(i)
-                        .movementType == RotationManager.Rotations.MovementType.RETARDED)
+                        .movementType == Rotations.MovementType.RETARDED)
                     index = 2;
 
                 switch (index){
@@ -188,23 +189,23 @@ public class ChartIntegration implements Runnable{
 
     public List<Vector2D> getDataVector(ColumnType X, ColumnType Y){
         List<Vector2D> dataVector = new ArrayList<>();
-        for (RotationManager.Rotations rotations : mainFrameController.getMouseTrapCarManager().getRotationsHistory()) {
+        for (Rotations rotations : mainFrameController.getMouseTrapCarManager().getRotationsHistory()) {
             Vector2D a = new Vector2D(0 , 0);
             switch (X){
                 case RPM:
-                    a.x(rotations.rpm);
+                    a.x(rotations.getRpm());
                     break;
                 case ROTATION:
-                    a.x(rotations.rotationValue);
+                    a.x(rotations.getRotationValue());
                     break;
                 case TIME:
-                    a.x(rotations.elapsedTime);
+                    a.x(rotations.getElapsedTime());
                     break;
                 case SPEED:
-                    a.x(rotations.speed);
+                    a.x(rotations.getSpeed());
                     break;
                 case DISTANCE:
-                    a.x(rotations.elapsedDistance);
+                    a.x(rotations.getElapsedDistance());
                     break;
             }
             switch (Y){

@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 
+import static com.matheusmarkies.manager.utilities.Save.ApplicationFolder;
 import static javafx.application.Application.launch;
 
 public class MouseTrapCarMain extends Application {
@@ -30,16 +31,22 @@ public class MouseTrapCarMain extends Application {
 
         File applicationFolder = new File(Save.ApplicationFolder);
 
+        for(String dir : Save.ImportantDirectories) {
+            File dirFile = new File(dir);
+            if (!dirFile.exists())
+                dirFile.mkdirs();
+        }
+
             if (!applicationFolder.exists()) {
                 applicationFolder.mkdirs();
             } else {
                 File carFile = new File(applicationFolder.getAbsolutePath() + "\\CarSettings.car");
                 if (carFile.exists())
-                    car = Save.openCarPresets();
+                    car = (Car) Save.read(new File(ApplicationFolder + "\\CarSettings.car"));
                 else {
                     carFile.createNewFile();
                     car = new Car();
-                    Save.saveCarSettings(car);
+                    Save.write(car,ApplicationFolder + "\\CarSettings.car");
                 }
             }
 

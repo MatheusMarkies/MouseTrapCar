@@ -3,6 +3,7 @@ package com.matheusmarkies;
 import com.matheusmarkies.manager.RotationManager;
 import com.matheusmarkies.manager.analysis.ChartIntegration;
 import com.matheusmarkies.manager.utilities.Save;
+import com.matheusmarkies.manager.utilities.XLS;
 import com.matheusmarkies.objects.Car;
 import com.matheusmarkies.popup.CarSettingsController;
 import com.matheusmarkies.popup.ConnectPopUpController;
@@ -22,12 +23,18 @@ import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static com.matheusmarkies.manager.utilities.Save.ApplicationFolder;
+import static com.matheusmarkies.manager.utilities.Save.ImportantDirectories;
 
 public class MainFrameController implements Initializable {
 
@@ -63,6 +70,8 @@ public class MainFrameController implements Initializable {
     @FXML
     private MenuBar menu_bar;
 
+    @FXML
+    private javafx.scene.control.Button saveButton;
     private ChartIntegration chartIntegration = new ChartIntegration();
 
     private Car car;
@@ -145,6 +154,20 @@ public class MainFrameController implements Initializable {
     @FXML
     void onClickInConnectButton(ActionEvent event) {
 
+    }
+    @FXML
+    void onClickInSave(ActionEvent event) {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+        try {
+            Save.write(rotationManager.getRotationList(),ImportantDirectories[0] + "\\CarInfo_"+timeStamp+".out");
+        } catch (IOException e) {
+            System.err.println(e);
+        }
+        try {
+            XLS.createXLSFile(rotationManager.getRotationList());
+        } catch (IOException e) {
+            System.err.println(e);
+        }
     }
 
     @FXML
@@ -238,7 +261,7 @@ public class MainFrameController implements Initializable {
         return serialReadder;
     }
 
-    public Car getCar() throws IOException, ClassNotFoundException { return Save.openCarPresets(); }
+    public Car getCar() throws IOException, ClassNotFoundException { return (Car) Save.read(new File(ApplicationFolder + "\\CarSettings.car")); }
 
     public void setCar(Car car) { this.car = car; }
 }

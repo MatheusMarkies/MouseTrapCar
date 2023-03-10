@@ -9,8 +9,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import static com.matheusmarkies.manager.utilities.Save.ApplicationFolder;
 
 public class CarSettingsController implements Initializable {
 
@@ -44,7 +47,7 @@ public class CarSettingsController implements Initializable {
 
             Car car = new Car(wheelDiameter, encoderTooth, axleTooth, 500);
 
-            Save.saveCarSettings(car);
+            Save.write(car, ApplicationFolder + "\\CarSettings.car");
             System.out.println("Salvando...");
         }catch (Exception exception){
             System.out.println("Nao foi possivel salvar");
@@ -54,9 +57,10 @@ public class CarSettingsController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-           wheel_diameter_inputfield.setText(Save.openCarPresets().getWheelDiameter() + "");
-            number_axle_tooth.setText(Save.openCarPresets().getAxleTooth() + "");
-            number_encoder_tooth.setText(Save.openCarPresets().getEncoderTooth() + "");
+            Car car = (Car)Save.read(new File(ApplicationFolder + "\\CarSettings.car"));
+           wheel_diameter_inputfield.setText(car.getWheelDiameter() + "");
+            number_axle_tooth.setText(car.getAxleTooth() + "");
+            number_encoder_tooth.setText(car.getEncoderTooth() + "");
         }catch (Exception exception){System.err.println(exception);}
     }
 

@@ -2,6 +2,7 @@ package com.matheusmarkies.manager.analysis;
 
 import com.matheusmarkies.manager.RotationManager;
 import com.matheusmarkies.manager.utilities.Vector2D;
+import com.matheusmarkies.objects.Rotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -131,10 +132,10 @@ public class SampleAnalysis {
         return Arrays.asList(vectorArray);
     }
 
-    public static List<RotationManager.Rotations> getFrequencyCurve(List<RotationManager.Rotations> rotations){
-        List<RotationManager.Rotations> smoothedRotations = new ArrayList<>();
+    public static List<Rotations> getFrequencyCurve(List<Rotations> rotations){
+        List<Rotations> smoothedRotations = new ArrayList<>();
 
-        RotationManager.Rotations maxAmplitude = null;
+        Rotations maxAmplitude = null;
         for(int i = 0; i < rotations.size();i++) {
             if(i == 0)
                 maxAmplitude = rotations.get(0);
@@ -149,15 +150,15 @@ public class SampleAnalysis {
 
         for(double k =0;k < 1;k+=0.1f){
            Vector2D curve = Vector2D.bezierCurve(A,C,B,k);
-           smoothedRotations.add(new RotationManager.Rotations(
+           smoothedRotations.add(new Rotations(
                    (double) Math.round(curve.y()*1000)/1000,
                    (double) Math.round(curve.x()*1000)/1000,
                    (curve.y()/0.1f)*60)
            );
         }
 
-        smoothedRotations.add(new RotationManager.Rotations(A.y(),A.x(),(A.y()/0.1f)*60));
-        smoothedRotations.add(new RotationManager.Rotations(B.y(),B.x(),(A.y()/0.1f)*60));
+        smoothedRotations.add(new Rotations(A.y(),A.x(),(A.y()/0.1f)*60));
+        smoothedRotations.add(new Rotations(B.y(),B.x(),(A.y()/0.1f)*60));
         //smoothedRotations.add(new RotationManager.Rotations(C.y(),C.x(),(A.y()/0.1f)*60));
 
         return smoothedRotations;

@@ -85,7 +85,7 @@ public class RotationManager {
 
             rpm.deltaTime = deltaTime;
             rpm.rpm = (rpm.rotationValue/deltaTime) * 60;
-
+//
             float arc = (float)(rpm.rotationValue * 360);
             rpm.elapsedDistance = Math.toRadians(arc) * (mainFrameController.getCar().getWheelDiameter()/2);
 

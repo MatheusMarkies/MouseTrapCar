@@ -3,19 +3,26 @@ package com.matheusmarkies.serialport;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortEvent;
 import com.fazecast.jSerialComm.SerialPortPacketListener;
-import com.matheusmarkies.manager.MouseTrapCarManager;
+import com.matheusmarkies.manager.RotationManager;
+import com.matheusmarkies.manager.utilities.KalmanFilter;
+import com.matheusmarkies.objects.Rotations;
+import javafx.scene.chart.XYChart;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 
-public class SerialRunnable implements SerialPortPacketListener {
+public class SerialRunnable implements SerialPortPacketListener, Runnable {
 
     private final SerialPort port;
-    private final MouseTrapCarManager mouseTrapCarManager;
+    private final RotationManager rotationManager;
 
-    public SerialRunnable(SerialPort port, MouseTrapCarManager mouseTrapCarManager) {
+    //int oldSize = 0;
+    //ObservableList<XYChart.Data> data = FXCollections.observableArrayList();
+
+    public SerialRunnable(SerialPort port, RotationManager rotationManager) {
         this.port = port;
-        this.mouseTrapCarManager = mouseTrapCarManager;
+        this.rotationManager = rotationManager;
     }
 
     @Override
@@ -28,43 +35,83 @@ public class SerialRunnable implements SerialPortPacketListener {
         return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
     }
 
+    @Override
+    public void run() {
+        port.addDataListener(this);
+        //mouseTrapCarManager.getMainFrameController().getRotationSeries().getData().add(new XYChart.Data<String,Double>("0",0.));
+    }
+
     enum ReadType{
-        RPM
+        DISTANCE, RPM
     }
 
     ReadType readType = null;
     boolean getReadType = true;
     private final byte[] buffer = new byte[2048];
+    float rot=0;
+
     @Override
     public void serialEvent(SerialPortEvent event) {
         if (event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE)
             return;
-        byte[] newData = new byte[port.bytesAvailable()];
+        byte[] buffer = new byte[port.bytesAvailable()];
 
-        String inputString = new String(newData, StandardCharsets.UTF_8);
-        System.out.println("Input data: "+newData.length);
+        String inputString = new String(buffer, StandardCharsets.UTF_16LE);
 
-        switch (inputString){
-            case "RPM:":
-                readType = ReadType.RPM;
-                getReadType = false;
-                break;
+        Scanner scanner_stream=  new Scanner( port.getInputStream());
+        while(scanner_stream.hasNextLine()) {
+            String received_string = scanner_stream.nextLine();
 
-            default:
-                if(getReadType)
-                    readType = null;
+            int received_str_len = received_string.length();
+            inputString = received_string;
 
-                if(readType != null)
-                    switch (readType)
-                    {
-                        case RPM:
-                            double RPM = Double.parseDouble(inputString);
-                            mouseTrapCarManager.addEntityRpmList(RPM);
-                            System.out.println("RPM: "+RPM);
-                            getReadType = true;
-                            break;
-                    }
-                break;
+            //System.out.println("Input data: " + inputString);
+
+            try {
+                switch (inputString) {
+                    case "R:":
+                        readType = ReadType.RPM;
+                        getReadType = false;
+                        break;
+                    case "D:":
+                        readType = ReadType.DISTANCE;
+                        getReadType = false;
+                        break;
+
+                    default:
+                        if (getReadType) {
+                            readType = null;
+                        }
+                        if (readType != null)
+                            switch (readType) {
+                                case RPM:
+                                    double CPR = Double.parseDouble(inputString);
+                                    double RPM = CPR;
+                                    Rotations rotation = rotationManager.addEntityRotationsList(Math.abs(CPR));
+
+                                    if (rotation != null)
+                                        if (RPM != 0.0 && Double.isFinite(rotation.rpm)) {
+
+                                            rotationManager.getRotationsHistory().add(rotation);
+                                            //System.out.println(rotation.toString());
+                                            //XYChart.Data data = rotationManager.addEntityToRotationsChart(rotation);
+                                            // if (data != null)
+                                            //rotationManager.getMainFrameController().getRotationSeries().getData().add(data);
+                                            //rotationManager.getMainFrameController().chartRefresh(true);
+                                        } //else
+                                    //rotationManager.getMainFrameController().chartRefresh(false);
+
+                                    getReadType = true;
+                                    break;
+                                case DISTANCE:
+                                    System.out.println(Double.parseDouble(inputString));
+                                    getReadType = true;
+                                    break;
+                            }
+                        break;
+                }
+            }catch (Exception exception){//System.err.println(exception);
+                 }
         }
 
     }

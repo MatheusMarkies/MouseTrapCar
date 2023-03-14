@@ -1,6 +1,6 @@
 package com.matheusmarkies.popup;
 
-import com.matheusmarkies.manager.MouseTrapCarManager;
+import com.matheusmarkies.manager.RotationManager;
 import com.matheusmarkies.serialport.SerialManager;
 import com.matheusmarkies.serialport.SerialReadder;
 import javafx.collections.FXCollections;
@@ -16,7 +16,7 @@ import java.util.ResourceBundle;
 
 public class ConnectPopUpController implements Initializable {
 
-    private MouseTrapCarManager mouseTrapCarManager;
+    private RotationManager rotationManager;
 
     @FXML
     private ChoiceBox<String> choisebox_serialport;
@@ -36,9 +36,10 @@ public class ConnectPopUpController implements Initializable {
     @FXML
     void onClickInConnectButton(ActionEvent event) {
         try {
-            serialReadder = new SerialReadder(mouseTrapCarManager, choisebox_serialport.getValue());
-            if(serialReadder.connect())
+            serialReadder = new SerialReadder(rotationManager, choisebox_serialport.getValue());
+            if(serialReadder.connect()) {
                 System.out.println("Connect!");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -50,7 +51,7 @@ public class ConnectPopUpController implements Initializable {
         choisebox_serialport.setItems(FXCollections.observableArrayList(list));
     }
 
-    public void setMouseTrapCarManager(MouseTrapCarManager mouseTrapCarManager) {
-        this.mouseTrapCarManager = mouseTrapCarManager;
+    public void setMouseTrapCarManager(RotationManager rotationManager) {
+        this.rotationManager = rotationManager;
     }
 }

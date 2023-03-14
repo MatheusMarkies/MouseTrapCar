@@ -56,15 +56,15 @@ public class XLS {
 
         int rowNum = 1;
         int colNum = 0;
-
+System.out.println(rotationList.getRotationsArrayList().size());
         for (int i =0;i<rotationList.getRotationsArrayList().size();i++) {
             Row bodyRow = sheet.createRow(i+1);
 
             Cell rotation= bodyRow.createCell(1);
             Cell time = bodyRow.createCell(0);
 
-            titleRotation.setCellValue(rotationList.getRotationsArrayList().get(i).getRotationValue());
-            titleTime.setCellValue(rotationList.getRotationsArrayList().get(i).getElapsedTime());
+            rotation.setCellValue(rotationList.getRotationsArrayList().get(i).getRotationValue());
+            time.setCellValue((double) rotationList.getRotationsArrayList().get(i).getElapsedTime());
 
             colNum = 0;
         }

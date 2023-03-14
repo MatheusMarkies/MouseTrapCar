@@ -110,6 +110,10 @@ public class RotationManager {
         return rotationList;
     }
 
+    public void setRotationList(RotationList rotationList) {
+        this.rotationList = rotationList;
+    }
+
     public MainFrameController getMainFrameController() {
         return mainFrameController;
     }

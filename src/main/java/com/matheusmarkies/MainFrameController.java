@@ -5,6 +5,8 @@ import com.matheusmarkies.manager.analysis.ChartIntegration;
 import com.matheusmarkies.manager.utilities.Save;
 import com.matheusmarkies.manager.utilities.XLS;
 import com.matheusmarkies.objects.Car;
+import com.matheusmarkies.objects.FileTypeFilter;
+import com.matheusmarkies.objects.RotationList;
 import com.matheusmarkies.popup.CarSettingsController;
 import com.matheusmarkies.popup.ConnectPopUpController;
 import com.matheusmarkies.serialport.SerialReadder;
@@ -22,6 +24,9 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -69,6 +74,9 @@ public class MainFrameController implements Initializable {
 
     @FXML
     private MenuBar menu_bar;
+
+    @FXML
+    private javafx.scene.control.Button openButton;
 
     @FXML
     private javafx.scene.control.Button saveButton;
@@ -159,7 +167,7 @@ public class MainFrameController implements Initializable {
     void onClickInSave(ActionEvent event) {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
         try {
-            Save.write(rotationManager.getRotationList(),ImportantDirectories[0] + "\\CarInfo_"+timeStamp+".out");
+            Save.write(rotationManager.getRotationList(),ImportantDirectories[0] + "\\CarInfo_"+timeStamp+".rsf");
         } catch (IOException e) {
             System.err.println(e);
         }
@@ -218,6 +226,27 @@ public class MainFrameController implements Initializable {
         } catch (IOException ignored) {
             System.err.println(ignored);
         }
+    }
+
+    @FXML
+    void onClickInOpen(ActionEvent event) {
+        RotationList rotationList = new RotationList();
+        JFileChooser jfc = new JFileChooser(new File(ImportantDirectories[0]));
+        FileFilter bridgeFilter = new FileTypeFilter(".rsf", "Race Save File");
+
+        jfc.setFileFilter(bridgeFilter);
+        int returnValue = jfc.showOpenDialog(null);
+
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = jfc.getSelectedFile();
+            try{
+                rotationList = (RotationList) Save.read(selectedFile);
+                rotationManager.setRotationList(rotationList);
+            }catch (Exception e){
+
+            }
+        }
+
     }
 
     boolean seriesAdded = false;
